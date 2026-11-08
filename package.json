@@ -1,0 +1,40 @@
+{
+  "name": "engineering-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.12.3",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @engineering-lab/api --filter @engineering-lab/web dev",
+    "dev:api": "pnpm --filter @engineering-lab/api dev",
+    "dev:web": "pnpm --filter @engineering-lab/web dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm --filter @engineering-lab/api test",
+    "db:migrate": "pnpm --filter @engineering-lab/api prisma:migrate",
+    "db:seed": "pnpm --filter @engineering-lab/api prisma:seed",
+    "db:studio": "pnpm --filter @engineering-lab/api prisma:studio",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,json,md,css}": "prettier --write"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "eslint": "^9.15.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "globals": "^15.12.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.15.0"
+  }
+}

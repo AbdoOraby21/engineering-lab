@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0B0F14" />
+    <meta
+      name="description"
+      content="Engineering Lab - Arduino, Raspberry Pi, sensors, electronics components and kits in Egypt. Build, Innovate, Create."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700&display=swap"
+      rel="preload"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <title>Engineering Lab - Build · Innovate · Create</title>
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('el_theme');
+          var theme = stored === 'light' ? 'light' : 'dark';
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (error) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+const { Client } = require('D:/ويبسايتي/apps/api/node_modules/pg');
+(async () => {
+  const c = new Client({ host: '127.0.0.1', port: 55433, user: 'postgres', database: 'engineering_lab' });
+  await c.connect();
+  const mig = await c.query('select migration_name, finished_at is not null as ok from _prisma_migrations order by started_at');
+  console.log('migrations:', mig.rows.map((r) => `${r.migration_name} ok=${r.ok}`).join(' | '));
+  const t = await c.query("select trigger_name from information_schema.triggers where event_object_table='Product'");
+  console.log('triggers:', t.rows.map((r) => r.trigger_name));
+  const idx = await c.query("select indexname from pg_indexes where tablename='Product' order by 1");
+  console.log('indexes:', idx.rows.map((r) => r.indexname).join(', '));
+  const cols = await c.query("select column_name from information_schema.columns where table_name='Product' and column_name in ('type','searchText','searchVector','isNew','reservedStock','shortDescriptionAr') order by 1");
+  console.log('columns:', cols.rows.map((r) => r.column_name));
+  const fn = await c.query("select proname from pg_proc where proname in ('search_normalize','product_refresh_search') order by 1");
+  console.log('functions:', fn.rows.map((r) => r.proname));
+  const cnt = await c.query('select count(*) filter (where "searchVector" is not null) as with_vector, count(*) filter (where "searchText" is not null) as with_text, count(*)::int as total from "Product"');
+  console.log('search cols populated:', cnt.rows[0]);
+  const nv = await c.query("select search_normalize('أردوينو إونو ١٢٣') as n");
+  console.log('normalize sample:', nv.rows[0].n);
+  await c.end();
+})().catch((e) => { console.error('ERR', e); process.exit(1); });

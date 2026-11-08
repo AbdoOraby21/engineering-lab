@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --color-bg: 246 248 250;
+  --color-surface: 255 255 255;
+  --color-surface-2: 241 245 249;
+  --color-border: 227 232 238;
+  --color-text: 11 17 23;
+  --color-muted: 100 116 139;
+  --color-brand-glow: 34 197 94;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-bg: 7 11 15;
+  --color-surface: 16 21 27;
+  --color-surface-2: 26 32 39;
+  --color-border: 28 35 43;
+  --color-text: 245 247 250;
+  --color-muted: 154 164 178;
+  --color-brand-glow: 34 197 94;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-bg text-content antialiased;
+    font-family: 'Poppins', 'Cairo', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  [dir='rtl'] body {
+    font-family: 'Cairo', 'Tajawal', 'Poppins', system-ui, sans-serif;
+  }
+
+  ::selection {
+    background: rgb(34 197 94 / 0.35);
+  }
+
+  :focus-visible {
+    outline: 2px solid #22c55e;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-[1536px] px-[26px];
+  }
+
+  .card {
+    @apply rounded-[14px] border border-line bg-surface shadow-card;
+  }
+
+  .input {
+    @apply w-full rounded-[12px] border border-line bg-surface2 px-4 py-2.5 text-sm text-content placeholder:text-muted/70 transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-content;
+  }
+
+  .field-error {
+    @apply mt-1.5 text-xs text-red-500;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-[12px] px-5 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand text-brand-fg shadow-[0_0_24px_rgba(34,197,94,0.35)] hover:bg-brand-hover hover:shadow-glow;
+  }
+
+  .btn-secondary {
+    @apply btn border border-line bg-surface text-content hover:border-brand/50 hover:text-brand;
+  }
+
+  .btn-ghost {
+    @apply btn text-muted hover:bg-surface2 hover:text-content;
+  }
+
+  .icon-btn {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface text-muted transition hover:border-brand/50 hover:text-brand;
+  }
+
+  .nav-link {
+    @apply relative inline-flex items-center gap-1.5 px-1 py-3 text-sm font-medium text-muted transition hover:text-content;
+  }
+
+  .nav-link-active {
+    @apply text-content;
+  }
+
+  .nav-link-active::after {
+    content: '';
+    @apply absolute inset-x-0 -bottom-px h-[3px] rounded-[2px] bg-brand;
+    box-shadow: 0 0 12px rgb(34 197 94 / 0.7);
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full border border-brand/30 bg-brand-soft px-3 py-1 text-xs font-medium text-brand;
+  }
+
+  .link {
+    @apply font-medium text-brand transition hover:text-brand-hover hover:underline;
+  }
+
+  .hero-grid {
+    background-image:
+      linear-gradient(rgb(34 197 94 / 0.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(34 197 94 / 0.09) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: radial-gradient(ellipse 80% 70% at 60% 40%, black 30%, transparent 75%);
+  }
+
+  .skeleton {
+    @apply animate-pulse rounded-xl bg-surface2;
+  }
+
+  .divider {
+    @apply border-t border-line;
+  }
+
+  /* Font utilities */
+  .font-poppins {
+    font-family: 'Poppins', 'Cairo', system-ui, sans-serif;
+  }
+  .font-cairo {
+    font-family: 'Cairo', 'Tajawal', 'Poppins', system-ui, sans-serif;
+  }
+}
