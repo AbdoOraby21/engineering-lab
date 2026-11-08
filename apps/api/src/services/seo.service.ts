@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma.js';
 import { env } from '../config/env.js';
+import { defaultLogoUrl, resolveLogoUrl } from '../lib/brand.js';
 
 const LOCALES: Array<{ code: string; label: string }> = [
   { code: 'ar', label: 'ar-EG' },
@@ -106,13 +107,13 @@ Sitemap: ${sitemapUrl}
 // JSON-LD structured data
 // ---------------------------------------------------------------------------
 
-export function jsonLdOrganization(): object {
+export async function jsonLdOrganization(): Promise<object> {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Engineering Lab',
     url: env.API_PUBLIC_URL,
-    logo: `${env.API_PUBLIC_URL}/uploads/banners/hero-components.svg`,
+    logo: await resolveLogoUrl(),
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: '+20 100 000 0000',
@@ -267,7 +268,7 @@ export function jsonLdArticle(post: {
       name: 'Engineering Lab',
       logo: {
         '@type': 'ImageObject',
-        url: `${env.API_PUBLIC_URL}/uploads/banners/hero-components.svg`,
+        url: defaultLogoUrl(),
       },
     },
     url: `${env.API_PUBLIC_URL}/${locale}/blog/posts/${post.slug}`,

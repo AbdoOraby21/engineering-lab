@@ -14,6 +14,7 @@ import {
 import Card from '../../components/ui/Card';
 import FieldError from '../../components/ui/FieldError';
 import Spinner from '../../components/ui/Spinner';
+import { DEFAULT_FAVICON_URL, DEFAULT_LOGO_URL } from '../../lib/brand';
 
 type FormValues = {
   'store.name': string;
@@ -334,12 +335,12 @@ export default function SettingsPage() {
             </div>
             <div>
               <label className="label">{t('admin.settings.fields.logoUrl')}</label>
-              <input {...register('store.logoUrl')} className="input" placeholder="https://..." />
+              <input {...register('store.logoUrl')} className="input" placeholder={DEFAULT_LOGO_URL} />
               <FieldError message={errors['store.logoUrl']?.message} />
             </div>
             <div>
               <label className="label">{t('admin.settings.fields.faviconUrl')}</label>
-              <input {...register('store.faviconUrl')} className="input" placeholder="https://..." />
+              <input {...register('store.faviconUrl')} className="input" placeholder={DEFAULT_FAVICON_URL} />
               <FieldError message={errors['store.faviconUrl']?.message} />
             </div>
             <div className="col-span-full flex items-center gap-2 text-sm font-semibold text-content border-b border-line pb-2 mb-3">

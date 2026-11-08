@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowRight, Cpu, ShieldCheck, Sparkles, Truck } from 'lucide-react';
-import { LogoMark } from '../layout/Logo';
+import Logo from '../layout/Logo';
 
 interface AuthShellProps {
   title: string;
@@ -24,12 +24,7 @@ export default function AuthShell({ title, subtitle, children, footer }: AuthShe
           <div className="hero-grid absolute inset-0 opacity-80" aria-hidden="true" />
           <div className="absolute -top-20 start-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-brand/15 blur-3xl" />
           <div className="relative">
-            <Link to={`/${isRtl ? 'ar' : 'en'}`} className="flex items-center gap-3">
-              <LogoMark className="h-11 w-11" />
-              <span className="text-xl font-extrabold text-content">
-                Engineering <span className="text-brand">Lab</span>
-              </span>
-            </Link>
+            <Logo size="md" />
             <p className="mt-8 max-w-sm text-2xl font-bold leading-snug text-content">
               {t('home.heroTitle')} <span className="text-brand">{t('home.heroHighlight')}</span>
             </p>
@@ -54,12 +49,7 @@ export default function AuthShell({ title, subtitle, children, footer }: AuthShe
 
         <div className="p-6 sm:p-10">
           <div className="mb-8 lg:hidden">
-            <Link to={`/${isRtl ? 'ar' : 'en'}`} className="flex items-center gap-2">
-              <LogoMark className="h-9 w-9" />
-              <span className="text-lg font-extrabold text-content">
-                Engineering <span className="text-brand">Lab</span>
-              </span>
-            </Link>
+            <Logo size="sm" />
           </div>
           <h1 className="text-2xl font-bold text-content sm:text-3xl">{title}</h1>
           <p className="mt-2 text-sm leading-6 text-muted">{subtitle}</p>

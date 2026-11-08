@@ -13,6 +13,7 @@ interface ProductRailProps {
   fallback?: ReactNode;
   contained?: boolean;
   home?: boolean;
+  loading?: boolean;
 }
 
 export default function ProductRail({
@@ -20,9 +21,10 @@ export default function ProductRail({
   subtitle: _subtitle,
   products,
   viewAllHref,
-  fallback,
+  fallback: _fallback,
   contained = true,
   home = false,
+  loading = false,
 }: ProductRailProps) {
   const { t } = useTranslation();
 
@@ -44,23 +46,46 @@ export default function ProductRail({
     </div>
   );
 
-  if (products.length === 0 && fallback) {
+  const cardCols = home
+    ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+    : 'grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4';
+
+  // Loading state: show skeleton cards so the page never looks blank.
+  if (loading) {
     return (
       <section className={`${contained ? 'container-page ' : ''}py-10`}>
         {header}
-        {fallback}
+        <div className={`grid gap-4.5 ${cardCols}`}>
+          {Array.from({ length: home ? 6 : 4 }).map((_, index) => (
+            <div key={index} className="product-card-skeleton">
+              <div className="aspect-square rounded-[14px] bg-surface-2 skeleton" />
+              <div className="mt-3 flex flex-col gap-1.5">
+                <div className="h-4 w-3/4 skeleton rounded" />
+                <div className="h-3 w-1/2 skeleton rounded" />
+                <div className="h-3 w-1/3 skeleton rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
     );
   }
 
   if (products.length === 0) {
-    return null;
+    return (
+      <section className={`${contained ? 'container-page ' : ''}py-10`}>
+        {header}
+        <div className="rounded-[14px] border border-line bg-surface p-8 text-center">
+          <p className="text-muted">{t('home.featuredEmpty')}</p>
+        </div>
+      </section>
+    );
   }
 
   return (
     <section className={`${contained ? 'container-page ' : ''}py-10`}>
       {header}
-      <div className={`grid gap-4.5 ${home ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6' : 'grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4'}`}>
+      <div className={`grid gap-4.5 ${cardCols}`}>
         {products.map((product) => (
           <ProductCard key={product.id} product={product} home={home} />
         ))}

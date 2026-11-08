@@ -3,6 +3,7 @@ import type { Locale } from '@engineering-lab/shared';
 import { env, isProduction } from '../config/env.js';
 import { logger } from './logger.js';
 import { prisma } from '../lib/prisma.js';
+import { resolveLogoUrl } from './brand.js';
 
 let transporter: Transporter | null = null;
 
@@ -71,6 +72,7 @@ function layout(
   ctaLabel: string,
   url: string,
   store: string,
+  logo: string,
 ): string {
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
   const align = locale === 'ar' ? 'right' : 'left';
@@ -80,6 +82,7 @@ function layout(
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#121821;border:1px solid #1E2733;border-radius:16px;overflow:hidden;">
       <tr>
         <td style="padding:28px;text-align:${align};">
+          <img src="${escapeHtml(logo)}" alt="Engineering Lab" width="56" height="56" style="display:block;width:56px;height:56px;margin:0 0 14px 0;" />
           <div style="font-size:20px;font-weight:bold;color:#22C55E;margin-bottom:16px;">${escapeHtml(store)}</div>
           <h1 style="font-size:22px;margin:0 0 12px;color:#FFFFFF;">${title}</h1>
           <div style="font-size:15px;line-height:1.7;color:#CBD5E1;">${body}</div>
@@ -129,6 +132,7 @@ export async function sendContactNotification(input: {
       'Reply by email',
       `mailto:${encodeURIComponent(input.email)}`,
       await storeName('en'),
+      await resolveLogoUrl(),
     ),
   });
 }
@@ -157,6 +161,7 @@ export async function sendTicketReplyNotification(input: {
       isAr ? 'عرض التذكرة' : 'View ticket',
       input.ticketUrl,
       await storeName(input.locale),
+      await resolveLogoUrl(),
     ),
   });
 }
@@ -188,6 +193,7 @@ export async function sendVerificationEmail(
       isAr ? 'تأكيد البريد' : 'Verify email',
       url,
       await storeName(locale),
+      await resolveLogoUrl(),
     ),
   });
 }
@@ -219,6 +225,7 @@ export async function sendPasswordResetEmail(
       isAr ? 'إعادة تعيين كلمة المرور' : 'Reset password',
       url,
       await storeName(locale),
+      await resolveLogoUrl(),
     ),
   });
 }

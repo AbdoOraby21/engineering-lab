@@ -16,6 +16,7 @@ export default tseslint.config(
       '**/postcss.config.js',
       'eslint.config.js',
       'apps/api/scripts/**',
+      'apps/api/check-db.cjs',
       'scripts/**',
     ],
   },

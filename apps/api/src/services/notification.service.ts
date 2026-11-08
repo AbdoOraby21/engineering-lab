@@ -8,6 +8,7 @@ import { prisma } from '../lib/prisma.js';
 import { sendMail } from '../lib/mailer.js';
 import { env } from '../config/env.js';
 import { logger } from '../lib/logger.js';
+import { resolveLogoUrl } from '../lib/brand.js';
 
 function escapeHtml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -168,7 +169,7 @@ export async function notifyOrderPlaced(
     ? `تم استلام طلبك رقم ${orderNumber} وجاري مراجعة الدفع.`
     : `Your order #${orderNumber} has been placed and payment is under review.`;
   const subject = isAr ? `طلبك رقم ${orderNumber}` : `Order #${orderNumber}`;
-  const html = layout(locale, subject, body, isAr ? 'تتبع الطلب' : 'Track order', `${env.WEB_URL}/${locale}/orders/${orderNumber}`);
+  const html = await layout(locale, subject, body, isAr ? 'تتبع الطلب' : 'Track order', `${env.WEB_URL}/${locale}/orders/${orderNumber}`);
   await sendEmail({ to: email, subject, html, text: body });
   await logNotification({ userId, channel: 'EMAIL', template: 'order.placed', locale, payload: { orderNumber }, status: 'SENT' });
   // WhatsApp (customer phone) — best effort
@@ -189,7 +190,7 @@ export async function notifyPaymentProofReceived(
     ? `تم استلام إثبات الدفع لطلب رقم ${orderNumber} وجاري المراجعة.`
     : `Payment proof for order #${orderNumber} received and under review.`;
   const subject = isAr ? `إثبات دفع - ${orderNumber}` : `Payment proof - ${orderNumber}`;
-  const html = layout(locale, subject, body, isAr ? 'التفاصيل' : 'View order', `${env.WEB_URL}/${locale}/orders/${orderNumber}`);
+  const html = await layout(locale, subject, body, isAr ? 'التفاصيل' : 'View order', `${env.WEB_URL}/${locale}/orders/${orderNumber}`);
   await sendEmail({ to: email, subject, html, text: body });
   await logNotification({ userId, channel: 'EMAIL', template: 'payment.proof.received', locale, payload: { orderNumber }, status: 'SENT' });
   await notifyWhatsApp(userId, locale, `whatsapp.payment.proof.received`, {
@@ -209,7 +210,7 @@ export async function notifyPaymentApproved(
     ? `تمت الموافقة على دفعتك وتأكيد طلب رقم ${orderNumber}.`
     : `Your payment was approved and order #${orderNumber} is confirmed.`;
   const subject = isAr ? `تم تأكيد الطلب - ${orderNumber}` : `Order confirmed - ${orderNumber}`;
-  const html = layout(locale, subject, body, isAr ? 'عرض الطلب' : 'View order', `${env.WEB_URL}/${locale}/orders/${orderNumber}`);
+  const html = await layout(locale, subject, body, isAr ? 'عرض الطلب' : 'View order', `${env.WEB_URL}/${locale}/orders/${orderNumber}`);
   await sendEmail({ to: email, subject, html, text: body });
   await logNotification({ userId, channel: 'EMAIL', template: 'payment.approved', locale, payload: { orderNumber }, status: 'SENT' });
   await notifyWhatsApp(userId, locale, `whatsapp.payment.approved`, {
@@ -230,7 +231,7 @@ export async function notifyPaymentRejected(
     ? `تم رفض إثبات الدفع لطلب رقم ${orderNumber}. السبب: ${reason}. يمكنك إعادة الإرسال.`
     : `Payment proof for order #${orderNumber} was rejected. Reason: ${reason}. You may resubmit.`;
   const subject = isAr ? `تم رفض الدفع - ${orderNumber}` : `Payment rejected - ${orderNumber}`;
-  const html = layout(locale, subject, body, isAr ? 'إعادة الإرسال' : 'Resubmit proof', `${env.WEB_URL}/${locale}/orders/${orderNumber}/pay`);
+  const html = await layout(locale, subject, body, isAr ? 'إعادة الإرسال' : 'Resubmit proof', `${env.WEB_URL}/${locale}/orders/${orderNumber}/pay`);
   await sendEmail({ to: email, subject, html, text: body });
   await logNotification({ userId, channel: 'EMAIL', template: 'payment.rejected', locale, payload: { orderNumber, reason }, status: 'SENT' });
   await notifyWhatsApp(userId, locale, `whatsapp.payment.rejected`, {
@@ -259,7 +260,7 @@ export async function notifyOrderExpired(
     ? `انتهى الموعد النهائي لدفع طلب رقم ${orderNumber} وتم إلغاؤه.`
     : `The payment deadline for order #${orderNumber} has expired and the order was cancelled.`;
   const subject = isAr ? `انتهت صلاحية الدفع - ${orderNumber}` : `Payment expired - ${orderNumber}`;
-  const html = layout(locale, subject, body, isAr ? 'التسوق الآن' : 'Start shopping', `${env.WEB_URL}/${locale}/catalog`);
+  const html = await layout(locale, subject, body, isAr ? 'التسوق الآن' : 'Start shopping', `${env.WEB_URL}/${locale}/catalog`);
   await sendEmail({ to: email, subject, html, text: body });
   await logNotification({ userId, channel: 'EMAIL', template: 'order.expired', locale, payload: { orderNumber }, status: 'SENT' });
   await notifyWhatsApp(userId, locale, `whatsapp.order.expired`, {
@@ -280,7 +281,7 @@ export async function notifyOrderExpiryReminder(
     ? `تبقى ${hoursLeft} ساعة على موعد دفع طلب رقم ${orderNumber}. يرجى إتمام الدفع قبل انتهاء المدة.`
     : `Only ${hoursLeft} hour(s) left to pay for order #${orderNumber}. Please complete payment before the deadline.`;
   const subject = isAr ? `تذكير بالدفع - ${orderNumber}` : `Payment reminder - ${orderNumber}`;
-  const html = layout(locale, subject, body, isAr ? 'الدفع الآن' : 'Pay now', `${env.WEB_URL}/${locale}/orders/${orderNumber}/pay`);
+  const html = await layout(locale, subject, body, isAr ? 'الدفع الآن' : 'Pay now', `${env.WEB_URL}/${locale}/orders/${orderNumber}/pay`);
   await sendEmail({ to: email, subject, html, text: body });
   await logNotification({ userId, channel: 'EMAIL', template: 'order.expiry.reminder', locale, payload: { orderNumber, hoursLeft }, status: 'SENT' });
   await notifyWhatsApp(userId, locale, `whatsapp.order.expiry.reminder`, {
@@ -303,7 +304,7 @@ export async function notifyOrderShipped(
     ? `تم شحن طلب رقم ${orderNumber}. ${tracking}`
     : `Order #${orderNumber} has been shipped. ${tracking}`;
   const subject = isAr ? `تم شحن الطلب - ${orderNumber}` : `Order shipped - ${orderNumber}`;
-  const html = layout(locale, subject, body, isAr ? 'تتبع الشحنة' : 'Track shipment', `${env.WEB_URL}/${locale}/orders/${orderNumber}`);
+  const html = await layout(locale, subject, body, isAr ? 'تتبع الشحنة' : 'Track shipment', `${env.WEB_URL}/${locale}/orders/${orderNumber}`);
   await sendEmail({ to: email, subject, html, text: body });
   await logNotification({ userId, channel: 'EMAIL', template: 'order.shipped', locale, payload: { orderNumber, trackingCompany, trackingNumber }, status: 'SENT' });
   await notifyWhatsApp(userId, locale, `whatsapp.order.shipped`, {
@@ -323,7 +324,7 @@ export async function notifyOrderDelivered(
     ? `تم تسليم طلب رقم ${orderNumber}. شكرًا لتعاملك معنا!`
     : `Order #${orderNumber} has been delivered. Thank you for shopping with us!`;
   const subject = isAr ? `تم التوصيل - ${orderNumber}` : `Order delivered - ${orderNumber}`;
-  const html = layout(locale, subject, body, isAr ? 'تقييم المنتجات' : 'Review products', `${env.WEB_URL}/${locale}/catalog`);
+  const html = await layout(locale, subject, body, isAr ? 'تقييم المنتجات' : 'Review products', `${env.WEB_URL}/${locale}/catalog`);
   await sendEmail({ to: email, subject, html, text: body });
   await logNotification({ userId, channel: 'EMAIL', template: 'order.delivered', locale, payload: { orderNumber }, status: 'SENT' });
   await notifyWhatsApp(userId, locale, `whatsapp.order.delivered`, {
@@ -344,7 +345,7 @@ export async function notifyOrderCancelled(
     ? `تم إلغاء طلب رقم ${orderNumber}${reason ? `. السبب: ${reason}` : '.'}.`
     : `Order #${orderNumber} has been cancelled${reason ? `. Reason: ${reason}` : ''}.`;
   const subject = isAr ? `تم إلغاء الطلب - ${orderNumber}` : `Order cancelled - ${orderNumber}`;
-  const html = layout(locale, subject, body, isAr ? 'التسوق الآن' : 'Start shopping', `${env.WEB_URL}/${locale}/catalog`);
+  const html = await layout(locale, subject, body, isAr ? 'التسوق الآن' : 'Start shopping', `${env.WEB_URL}/${locale}/catalog`);
   await sendEmail({ to: email, subject, html, text: body });
   await logNotification({ userId, channel: 'EMAIL', template: 'order.cancelled', locale, payload: { orderNumber, reason }, status: 'SENT' });
   await notifyWhatsApp(userId, locale, `whatsapp.order.cancelled`, {
@@ -366,7 +367,7 @@ export async function notifyReturnStatus(
     ? `تحديث حالة طلب الإرجاع لطلب رقم ${orderNumber}: ${status}${note ? `. ملاحظة: ${note}` : ''}.`
     : `Return request for order #${orderNumber} updated to: ${status}${note ? `. Note: ${note}` : ''}.`;
   const subject = isAr ? `تحديث الإرجاع - ${orderNumber}` : `Return update - ${orderNumber}`;
-  const html = layout(locale, subject, body, isAr ? 'عرض التفاصيل' : 'View details', `${env.WEB_URL}/${locale}/orders/${orderNumber}`);
+  const html = await layout(locale, subject, body, isAr ? 'عرض التفاصيل' : 'View details', `${env.WEB_URL}/${locale}/orders/${orderNumber}`);
   await sendEmail({ to: email, subject, html, text: body });
   await logNotification({ userId, channel: 'EMAIL', template: 'return.update', locale, payload: { orderNumber, status, note }, status: 'SENT' });
   await notifyWhatsApp(userId, locale, `whatsapp.return.update`, {
@@ -390,7 +391,7 @@ export async function notifyTicketReplyNotification(input: {
     text: isAr
       ? `مرحبًا ${input.customerName}، هناك رد جديد على تذكرتك "${input.subject}":\n\n${input.body}\n\n${input.ticketUrl}`
       : `Hi ${input.customerName}, there is a new reply on your ticket "${input.subject}":\n\n${input.body}\n\n${input.ticketUrl}`,
-    html: layout(
+    html: await layout(
       input.locale,
       isAr ? 'رد جديد على تذكرة الدعم' : 'New support reply',
       isAr
@@ -460,15 +461,17 @@ async function logNotification(input: {
   });
 }
 
-function layout(locale: Locale, title: string, body: string, ctaLabel: string, url: string): string {
+async function layout(locale: Locale, title: string, body: string, ctaLabel: string, url: string): Promise<string> {
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
   const align = locale === 'ar' ? 'right' : 'left';
+  const logo = await resolveLogoUrl();
   return `<!doctype html>
 <html lang="${locale}" dir="${dir}">
   <body style="margin:0;padding:24px;background:#0B0F14;font-family:Arial,sans-serif;color:#E5E7EB;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#121821;border:1px solid #1E2733;border-radius:16px;overflow:hidden;">
       <tr>
         <td style="padding:28px;text-align:${align};">
+          <img src="${escapeHtml(logo)}" alt="Engineering Lab" width="56" height="56" style="display:block;width:56px;height:56px;margin:0 0 14px 0;" />
           <div style="font-size:20px;font-weight:bold;color:#22C55E;margin-bottom:16px;">Engineering Lab</div>
           <h1 style="font-size:22px;margin:0 0 12px;color:#FFFFFF;">${title}</h1>
           <div style="font-size:15px;line-height:1.7;color:#CBD5E1;">${body}</div>

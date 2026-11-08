@@ -6,6 +6,7 @@ import { LogOut, Menu, X, ChevronDown } from 'lucide-react';
 import { getCurrentLang } from '../../lib/localized';
 import LanguageSwitcher from '../layout/LanguageSwitcher';
 import ThemeToggle from '../layout/ThemeToggle';
+import Logo from '../layout/Logo';
 
 const NAV = [
   { key: 'admin.overview', to: 'overview', icon: 'layout-dashboard' },
@@ -51,7 +52,7 @@ export default function AdminLayout() {
         } lg:relative lg:translate-x-0`}
       >
         <div className="flex items-center justify-between h-16 px-4 border-b border-line">
-          <div className="text-sm font-bold text-content">Engineering Lab</div>
+          <Logo size="sm" />
           <button
             type="button"
             onClick={() => setSidebarOpen(false)}

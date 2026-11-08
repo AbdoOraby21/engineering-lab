@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { env } from '../config/env.js';
 import { logger } from '../lib/logger.js';
 import { prisma } from '../lib/prisma.js';
+import { loadLogoBuffer, resolveLogoUrl } from '../lib/brand.js';
 
 // ---------------------------------------------------------------------------
 // Arabic shaping (Unicode presentation forms). Arabic letters change shape
@@ -211,6 +212,7 @@ export async function generateInvoicePdf(order: OrderDto): Promise<Buffer> {
   const storeNameAr = await settingString('store.nameAr', 'Engineering Lab');
   const storeAddressAr = await settingString('contact.addressAr', 'القاهرة، مصر');
   const storeAddressEn = await settingString('contact.addressEn', 'Cairo, Egypt');
+  const logoBuffer = await loadLogoBuffer(await resolveLogoUrl());
 
   return new Promise((resolve, reject) => {
     try {
@@ -239,6 +241,14 @@ export async function generateInvoicePdf(order: OrderDto): Promise<Buffer> {
       // ---------- Page 1 ----------
       doc.addPage();
 
+      if (logoBuffer) {
+        try {
+          doc.image(logoBuffer, (pageW - 36) / 2, margin + 16, { width: 36, height: 36 });
+        } catch (error) {
+          logger.warn({ err: error }, 'Failed to render invoice logo');
+        }
+      }
+
       doc.font(boldFont).fontSize(17);
       doc.text(storeNameAr, margin, margin, { align: 'right' });
       doc.font(baseFont).fontSize(9);
@@ -250,7 +260,7 @@ export async function generateInvoicePdf(order: OrderDto): Promise<Buffer> {
       doc.text(storeAddressEn, pageW - margin, margin + 18, { align: 'left' });
 
       // Invoice title (centered)
-      let y = margin + 50;
+      let y = margin + 64;
       doc.font(boldFont).fontSize(20);
       doc.text('فاتورة / INVOICE', margin, y, { align: 'center', width: pageW - 2 * margin });
       y += 30;

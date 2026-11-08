@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { DEFAULT_OG_IMAGE } from '../lib/brand';
 
 interface SeoHeadProps {
   title?: string | null;
@@ -17,6 +18,8 @@ export default function SeoHead({ title, description, image, canonical, jsonLd }
   const url = canonical ?? (typeof window !== 'undefined' ? window.location.href : '');
   const alternateAr = origin ? `${origin}/ar${typeof window !== 'undefined' ? window.location.pathname.replace(/^\/[^/]+/, '') : ''}` : undefined;
   const alternateEn = origin ? `${origin}/en${typeof window !== 'undefined' ? window.location.pathname.replace(/^\/[^/]+/, '') : ''}` : undefined;
+  const rawImage = image?.trim() || DEFAULT_OG_IMAGE;
+  const ogImage = rawImage.startsWith('http') || !origin ? rawImage : `${origin}${rawImage}`;
 
   return (
     <Helmet>
@@ -29,11 +32,15 @@ export default function SeoHead({ title, description, image, canonical, jsonLd }
       {title ? <meta property="og:title" content={title} /> : null}
       {description ? <meta property="og:description" content={description} /> : null}
       <meta property="og:type" content="website" />
-      {image ? <meta property="og:image" content={image} /> : null}
+      <meta property="og:site_name" content="Engineering Lab" />
+      <meta property="og:image" content={ogImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content="Engineering Lab emblem" />
       {title ? <meta name="twitter:card" content="summary_large_image" /> : null}
       {title ? <meta name="twitter:title" content={title} /> : null}
       {description ? <meta name="twitter:description" content={description} /> : null}
-      {image ? <meta name="twitter:image" content={image} /> : null}
+      <meta name="twitter:image" content={ogImage} />
       {jsonLd ? (
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       ) : null}

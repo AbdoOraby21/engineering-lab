@@ -11,6 +11,7 @@ import {
 import i18n, { getStoredLanguage, isAppLanguage } from './lib/i18n';
 import { ensureSession } from './lib/session';
 import { useUiStore } from './stores/ui.store';
+import BrandHead from './components/BrandHead';
 import Header from './components/layout/Header';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
@@ -108,6 +109,7 @@ function LocaleLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <BrandHead />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-brand focus:text-white focus:rounded"

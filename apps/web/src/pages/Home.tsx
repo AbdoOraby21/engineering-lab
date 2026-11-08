@@ -29,6 +29,7 @@ import {
 } from '../lib/catalogApi';
 import { fetchBanners } from '../lib/contentApi';
 import { localizedName } from '../lib/localized';
+import { organizationJsonLd } from '../lib/brand';
 import { useAuthStore } from '../stores/auth.store';
 import ProductRail from '../components/home/ProductRail';
 import RecentlyViewed from '../components/home/RecentlyViewed';
@@ -156,8 +157,12 @@ export default function HomePage() {
 
   return (
     <div className="animate-fade-in">
-      <SeoHead title={`${t('home.heroTitle')} ${t('home.heroHighlight')} | ${t('common.appName')}`} description={t('home.heroSubtitle')} />
-      <section className="relative overflow-hidden h-[370px] w-full" style={{ backgroundColor: '#050d0a' }}>
+      <SeoHead
+        title={`${t('home.heroTitle')} ${t('home.heroHighlight')} | ${t('common.appName')}`}
+        description={t('home.heroSubtitle')}
+        jsonLd={organizationJsonLd()}
+      />
+      <section className="relative overflow-hidden min-h-[370px] w-full" style={{ backgroundColor: '#050d0a' }}>
         {/* Radial glows */}
         <div className="absolute top-[40%] left-[25%] w-[600px] h-[600px] rounded-full bg-brand/20 blur-[120px] mix-blend-overlay" />
         <div className="absolute top-[10%] left-[55%] w-[520px] h-[520px] rounded-full bg-brand/15 blur-[100px] mix-blend-overlay" />
@@ -176,25 +181,25 @@ export default function HomePage() {
         </div>
         {/* Bottom fade to page background */}
         <div className="absolute bottom-0 left-0 right-0 h-[40px] bg-gradient-to-t from-[#050d0a] to-transparent" />
-        <div className="container-page relative h-full flex items-center">
+        <div className="container-page relative min-h-[370px] flex items-center">
           {/* Left content block */}
-          <div className={`flex-1 relative z-10 ps-[58px] rtl:pe-[58px] text-start rtl:text-end pr-[80px] rtl:pr-0 rtl:pl-[80px]`}>
+          <div className="flex-1 relative z-10 ps-[58px] pe-[80px] text-start">
             <span className="inline-block mb-3 rounded-full border border-brand/30 bg-brand-soft px-3 py-1 text-xs font-medium text-brand">
               {activeBanner ? bannerTitle(activeBanner) : t('home.heroBadge')}
             </span>
-            <h1 className={`mt-4 text-[84px] font-bold leading-1 tracking-tight text-content ${isRtl ? '' : 'italic'} rtl:not-italic`}>
+            <h1 className="mt-4 text-[84px] font-bold leading-[1.1] tracking-tight text-content italic [dir=rtl]:not-italic">
               {activeBanner ? bannerTitle(activeBanner) : t('home.heroTitle')}{' '}
               <span className="text-brand">
                 {activeBanner ? bannerHighlight(activeBanner) : t('home.heroHighlight')}
               </span>
             </h1>
-            <p className="mt-4 text-[31px] font-semibold leading-7 text-content max-w-[720px] rtl:max-w-none">
+            <p className="mt-4 text-[31px] font-semibold leading-[1.5] text-content max-w-[720px] [dir=rtl]:max-w-none [dir=rtl]:text-end">
               {renderHeroSubtitle()}
             </p>
-            <p className="mt-5 italic text-[26px] leading-7 text-content/90 rtl:not-italic max-w-[720px] rtl:max-w-none">
+            <p className="mt-5 italic text-[26px] leading-[1.5] text-content/90 max-w-[720px] [dir=rtl]:not-italic [dir=rtl]:max-w-none [dir=rtl]:text-end">
               {t('home.heroFeatures')}
             </p>
-            <div className="mt-10 flex items-center gap-4 rtl:gap-4">
+            <div className="mt-10 flex items-center gap-4">
               <Link
                 to={`/${currentLang}/catalog`}
                 className="flex items-center gap-2 rounded-[10px] px-8 py-[17px] bg-gradient-to-b from-brand via-brand-hover text-white font-bold text-[22px] shadow-[0_0_24px_rgba(34,197,94,0.35)] transition hover:-translate-y-[1px] hover:shadow-glow"
@@ -206,7 +211,7 @@ export default function HomePage() {
             </div>
 
             {banners.length > 1 ? (
-              <div className="mt-12 flex items-center gap-2 rtl:gap-2">
+              <div className="mt-12 flex items-center gap-2">
                 <button
                   type="button"
                   className="h-4 w-4 rounded-full bg-[#4B5560] hover:bg-muted transition"
@@ -241,7 +246,7 @@ export default function HomePage() {
           </div>
 
           {/* Right product composition image */}
-          <div className={`flex-1 relative z-10 h-full ${isRtl ? 'items-start justify-start pl-[80px] rtl:pr-[80px]' : 'items-end justify-end pr-[80px] rtl:pl-[80px]'}`}>
+          <div className={`flex-1 relative z-10 h-full ${isRtl ? 'items-start justify-start' : 'items-end justify-end'}`}>
             <div className="relative w-[880px] h-[370px] shrink-0">
               {activeBanner?.imageUrl ? (
                 <img
@@ -300,6 +305,10 @@ export default function HomePage() {
               <Skeleton key={index} className="flex-initial h-[117px] min-w-[150px] rounded-[14px]" />
             ))}
           </div>
+        ) : rootCategories.length === 0 ? (
+          <div className="rounded-[14px] border border-line bg-surface p-8 text-center">
+            <p className="text-muted">{t('home.featuredEmpty')}</p>
+          </div>
         ) : (
           <div className="flex flex-row gap-2">
             {rootCategories.slice(0, 7).map((category) => {
@@ -348,6 +357,7 @@ export default function HomePage() {
         products={featuredQuery.data ?? []}
         viewAllHref={`/${currentLang}/catalog?featured=true`}
         home
+        loading={featuredQuery.isLoading}
       />
 
       <ProductRail
@@ -355,6 +365,7 @@ export default function HomePage() {
         subtitle={t('home.newArrivalsSubtitle')}
         products={newArrivalsQuery.data ?? []}
         viewAllHref={`/${currentLang}/catalog?sort=newest`}
+        loading={newArrivalsQuery.isLoading}
       />
 
       <ProductRail
@@ -362,6 +373,7 @@ export default function HomePage() {
         subtitle={t('home.bestSellersSubtitle')}
         products={bestSellersQuery.data ?? []}
         viewAllHref={`/${currentLang}/catalog?sort=popular`}
+        loading={bestSellersQuery.isLoading}
       />
 
       <ProductRail
@@ -369,6 +381,7 @@ export default function HomePage() {
         subtitle={t('home.bundlesSubtitle')}
         products={bundlesQuery.data ?? []}
         viewAllHref={`/${currentLang}/catalog?q=kit`}
+        loading={bundlesQuery.isLoading}
       />
 
       <RecentlyViewed />
