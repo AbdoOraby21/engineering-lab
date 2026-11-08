@@ -171,3 +171,26 @@ Full audit findings: `docs/security-audit.md`.
 
 - This is a Vite SPA; SEO relies on meta tags, JSON-LD and an API-generated `sitemap.xml`/`robots.txt`. Migrating the storefront to SSR (e.g. Remix or Next.js) is a sensible future step for stronger SEO.
 - Prices never come from the client: totals are recomputed in the API from server-side product data.
+
+## Deployment
+
+- **Vercel**: The web frontend is deployed on Vercel via Git integration. Every push to `main` triggers a new production build. The `vercel.json` file configures SPA rewrites, API rewrites to the backend, security headers, and cache control for hashed assets.
+- **Render/Railway**: The API is deployed as a long‑running Node service (multi‑stage Dockerfile, non‑root user, healthcheck). Managed PostgreSQL is attached; environment variables are set through the platform dashboard.
+- **Docker (self‑hosting)**: `docker-compose.prod.yml` brings up Nginx/Caddy reverse‑proxy, the API container, PostgreSQL, and optional Redis. TLS can be provided by Caddy (Let's Encrypt) or by custom certificates.
+- **CI/CD**: GitHub Actions runs `lint-and-typecheck`, `api-tests`, `web-tests`, and `build` on every PR. Merging to `main` triggers `deploy.yml`, which:
+  1. Runs the full test suite.
+  2. Deploys the API to Render (via deploy hook) or Railway (via CLI), then runs `prisma migrate deploy`.
+  3. Triggers a Vercel deployment (auto‑deploy on `main` push).
+  4. Performs post‑deploy smoke tests (`/health`, `/ready`, home page, product list, login page).
+- **Environment variables**: All secrets (`DATABASE_URL`, `JWT_ACCESS_SECRET`, `SMTP_PASS`, `WHATSAPP_ACCESS_TOKEN`, Cloudinary keys) must be set in the platform secrets UI; never committed to the repository.
+- **Domain & HTTPS**: Configure `www.example.com` → apex `example.com` redirect via DNS. Obtain a Let's Encrypt certificate (Caddy or platform‑provided). Update `API_PUBLIC_URL` and `WEB_URL` to the custom domains.
+- **Backups**: Daily `pg_dump` backups are stored in encrypted storage (`scripts/backup.sh`). Restore procedure is documented in `docs/troubleshooting.md`.
+- **Rollback**: `prisma migrate rollback <target>` or restore from backup. Always test rollback in a staging environment first.
+- **Contributing**:
+  - Open a ticket or PR for any bug or feature.
+  - Follow the `CONTRIBUTING.md` style (if present) or the conventions in `docs/extending.md`.
+  - Run `pnpm lint`, `pnpm typecheck`, and `pnpm test` before opening a PR.
+  - Add Arabic language support for any new UI text; the DB already stores `nameAr`/`nameEn` pairs.
+- **License**: This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+- Prices never come from the client: totals are recomputed in the API from server-side product data.

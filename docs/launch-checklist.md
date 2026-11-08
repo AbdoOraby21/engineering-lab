@@ -27,6 +27,7 @@ This checklist is completed before Phase 8 (deployment) work begins.
 - [ ] DB check constraints applied (non-negative stock/prices/quantities/fees).
 - [ ] Backup/restore script tested (`scripts/db-backup.ts` / `db-restore.ts`); restore procedure documented.
 - [ ] Indexes reviewed via `EXPLAIN ANALYZE` on heaviest queries (product list + facets, search, admin stats, orders).
+- [ ] Graceful shutdown verified; DB pool disconnects on exit.
 
 ## 3. Performance
 
@@ -66,7 +67,7 @@ This checklist is completed before Phase 8 (deployment) work begins.
 - [ ] `docs/launch-checklist.md` — this file.
 - [ ] README updated with security and operations sections.
 
-## Launch blockers for Phase 8
+## 7. Launch blockers for Phase 8
 
 List any item above that cannot be checked PASS before deployment:
 
@@ -74,3 +75,43 @@ List any item above that cannot be checked PASS before deployment:
 2. ________________________________________________
 
 Sign-off: ____________________  Date: ___________
+
+---
+
+## Phase 8 Manual Test Checklist (Completed during Phase 8)
+
+- [ ] `pnpm db:seed` reports correct data (admin, 27 governorates, static pages, 55 products).
+- [ ] Swagger (`/api/docs`) shows all endpoints with correct schemas.
+- [ ] `GET /api/v1/categories/tree` returns roots with bilingual names and product counts.
+- [ ] `GET /api/v1/products?q=ردينو` (no hamza) returns products; `GET /api/v1/products?q=ردينو` finds "ردينو" via trigram typo tolerance.
+- [ ] `GET /api/v1/products?category=microcontrollers&inStock=true&sort=price_asc` filters + paginates correctly.
+- [ ] `GET /api/v1/products/arduino-uno-r3` returns images, specs and variants.
+- [ ] Bundle product detail lists its component products and computes availability.
+- [ ] Deactivating an ancestor category hides every descendant product from lists and detail.
+- [ ] Inactive product returns `404 PRODUCT_NOT_FOUND`.
+- [ ] `/uploads/products/arduino-uno-r3.svg` serves a placeholder image.
+- [ ] `pnpm test` → API integration tests green; `pnpm typecheck` and `pnpm lint` clean.
+- [ ] E2E flows: navigation (home→category→product→cart) green in AR and EN, desktop + mobile.
+- [ ] E2E search autocomplete green in AR and EN (desktop combobox + mobile autocomplete).
+- [ ] Coverage thresholds met (≥ 85% on orders, inventory, payments, auth).
+- [ ] Lighthouse targets met (Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 95 on Home, Category, Product, Blog).
+- [ ] Load test p95 < 300 ms for catalog reads under target concurrency.
+
+---
+
+## Post-Launch Improvement Backlog (won't block launch)
+
+- Add Redis for rate‑limit/store cache (currently in‑memory only).
+- Migrate from pdfkit to headless Chromium + Cairo for Arabic PDF invoices.
+- Implement loyalty points program.
+- Add multi-warehouse support (stock across locations).
+- Integrate Paymob gateway (currently Vodafone Cash / InstaPay only).
+- Add SMS notification channel (currently WhatsApp + email only).
+- Implement multi-currency support (prices in piasters only).
+- Add abandoned cart recovery flow.
+- Add wishlist sync across devices.
+- Add subscription/reoccurring payments.
+- Add dark/light theme toggle (already present; test contrast AA).
+- Add locale switching for checkout (currently English/Arabic only at order time).
+- Add QR codes for payment proofs (WhatsApp + email).
+- Add analytics consent mode (GDPR/PDPA compliance).

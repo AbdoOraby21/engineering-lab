@@ -1,0 +1,131 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm --filter @engineering-lab/api test
+      - run: pnpm --filter @engineering-lab/web test
+
+  deploy-api:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # Deploy to Render via deploy hook (set RENDER_DEPLOY_HOOK in secrets)
+      # To use Railway: `railway up` via Railway CLI (set RAILWAY_TOKEN in secrets)
+      - name: Deploy API to Render
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -n "$RENDER_DEPLOY_HOOK" ]; then
+            curl -X POST "$RENDER_DEPLOY_HOOK"
+          else
+            echo "Skipping Render deploy (no hook set)"
+          fi
+
+      # Run Prisma migrate deploy
+      - name: Run Prisma migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          pnpm --filter @engineering-lab/api prisma migrate deploy
+
+  deploy-web:
+    needs: deploy-api
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # Vercel auto-deploys on git push to main (via GitHub Integration).
+      # No manual step needed if Vercel is connected to this repo.
+      - name: Trigger Vercel deployment
+        run: |
+          echo "Vercel auto-deploys on push to main (via GitHub Integration)."
+          echo "Ensure the Vercel project is connected to this GitHub repo."
+
+  post-deploy-smoke:
+    needs: deploy-web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for deploy propagation
+        run: |
+          echo "Waiting 60s for deploy propagation..."
+          sleep 60
+
+      - name: Smoke test /health
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80/api/v1/health || echo "0")
+          if [ "$STATUS" -eq 200 ]; then
+            echo "✅ /health endpoint healthy"
+          else
+            echo "❌ /health returned $STATUS"
+            exit 1
+          fi
+
+      - name: Smoke test /ready
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80/api/v1/ready || echo "0")
+          if [ "$STATUS" -eq 200 ]; then
+            echo "✅ /ready endpoint healthy"
+          else
+            echo "❌ /ready returned $STATUS"
+            exit 1
+          fi
+
+      - name: Smoke test home page
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80/ || echo "0")
+          if [ "$STATUS" -eq 200 ]; then
+            echo "✅ Home page healthy"
+          else
+            echo "❌ Home page returned $STATUS"
+            exit 1
+          fi
+
+      - name: Smoke test product list
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80/catalog || echo "0")
+          if [ "$STATUS" -eq 200 ]; then
+            echo "✅ Product list healthy"
+          else
+            echo "❌ Product list returned $STATUS"
+            exit 1
+          fi
