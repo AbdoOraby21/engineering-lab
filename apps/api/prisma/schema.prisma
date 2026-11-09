@@ -281,11 +281,6 @@ model Product {
   @@index([nameEn(ops: raw("gin_trgm_ops"))], type: Gin)
   @@index([nameAr(ops: raw("gin_trgm_ops"))], type: Gin)
   @@index([sku(ops: raw("gin_trgm_ops"))], type: Gin)
-  @@check("stock >= 0")
-  @@check("reservedStock >= 0")
-  @@check("price >= 0")
-  @@check("compareAtPrice IS NULL OR compareAtPrice >= 0")
-  @@check("lowStockThreshold >= 0")
 }
 
 model ProductImage {
@@ -321,7 +316,6 @@ model ProductVariant {
   cartItems      CartItem[]      @relation("CartItemVariant")
 
   @@index([productId, sortOrder])
-  @@check("stock >= 0")
 }
 
 model BundleItem {
@@ -494,7 +488,6 @@ model CartItem {
 
   @@unique([cartId, productId, variantId])
   @@index([cartId])
-  @@check("qty > 0")
 }
 
 model ContactMessage {
@@ -561,7 +554,6 @@ model ShippingZone {
   updatedAt      DateTime @updatedAt
 
   @@index([isActive, governorate])
-  @@check("feeEgp >= 0")
 }
 
 model Coupon {
@@ -582,11 +574,6 @@ model Coupon {
 
   @@index([code, isActive])
   @@index([expiresAt, isActive])
-  @@check("value >= 0")
-  @@check("minSubtotal IS NULL OR minSubtotal >= 0")
-  @@check("maxDiscount IS NULL OR maxDiscount >= 0")
-  @@check("usageLimit IS NULL OR usageLimit >= 0")
-  @@check("perUserLimit IS NULL OR perUserLimit >= 0")
 }
 
 model CouponRedemption {
@@ -641,10 +628,6 @@ model Order {
   @@index([status, createdAt])
   @@index([orderNumber])
   @@index([paymentDeadlineAt, status])
-  @@check("subtotal >= 0")
-  @@check("discountTotal >= 0")
-  @@check("shippingFee >= 0")
-  @@check("total >= 0")
 }
 
 model OrderItem {
@@ -668,9 +651,6 @@ model OrderItem {
 
   @@index([orderId])
   @@index([productId])
-  @@check("qty > 0")
-  @@check("unitPrice >= 0")
-  @@check("lineTotal >= 0")
 }
 
 model OrderStatusHistory {
