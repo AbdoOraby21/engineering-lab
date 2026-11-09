@@ -1072,8 +1072,9 @@ export const adminBannerUpdateSchema = adminBannerBaseSchema.partial().refine(
 export type AdminBannerUpdate = z.infer<typeof adminBannerUpdateSchema>;
 
 export const importQuerySchema = z.object({
-  dryRun: booleanQuerySchema.default(true),
+  dryRun: booleanQuerySchema.default('true'),
 });
+
 export type ImportQuery = z.infer<typeof importQuerySchema>;
 
 export const exportQuerySchema = z.object({
