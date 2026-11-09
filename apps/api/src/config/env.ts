@@ -16,7 +16,7 @@ const envSchema = z.object({
   JWT_ACCESS_TTL_SECONDS: z.coerce.number().int().positive().default(900),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(7),
 
-  COOKIE_SECURE: boolFromEnv.default(false),
+  COOKIE_SECURE: boolFromEnv.default('false'),
   COOKIE_DOMAIN: z.string().optional(),
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
 
@@ -26,7 +26,7 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
 
-  SMTP_SECURE: boolFromEnv.default(false),
+  SMTP_SECURE: boolFromEnv.default('false'),
 
   MAIL_FROM: z.string().default('Engineering Lab <no-reply@engineering-lab.local>'),
   STORE_EMAIL: z.string().email().default('support@engineeringlab.eg'),
@@ -37,7 +37,7 @@ const envSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(20),
 
-  GOOGLE_OAUTH_ENABLED: boolFromEnv.default(false),
+  GOOGLE_OAUTH_ENABLED: boolFromEnv.default('false'),
 
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
@@ -47,7 +47,7 @@ const envSchema = z.object({
   UPLOAD_MAX_BYTES: z.coerce.number().int().positive().default(5 * 1024 * 1024),
   DATASHEET_MAX_BYTES: z.coerce.number().int().positive().default(15 * 1024 * 1024),
 
-  REVIEWS_REQUIRE_PURCHASE: boolFromEnv.default(true),
+  REVIEWS_REQUIRE_PURCHASE: boolFromEnv.default('true'),
 
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
