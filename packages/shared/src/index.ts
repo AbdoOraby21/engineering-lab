@@ -1059,6 +1059,7 @@ export const adminBannerBaseSchema = z.object({
   endsAt: z.coerce.date().nullish(),
 });
 export type AdminBannerInput = z.infer<typeof adminBannerBaseSchema>;
+
 export const adminBannerSchema = adminBannerBaseSchema.refine(
   (data) => !data.startsAt || !data.endsAt || data.startsAt < data.endsAt,
   { message: 'startsAt must be before endsAt', path: ['endsAt'] },
@@ -1071,7 +1072,7 @@ export const adminBannerUpdateSchema = adminBannerBaseSchema.partial().refine(
 export type AdminBannerUpdate = z.infer<typeof adminBannerUpdateSchema>;
 
 export const importQuerySchema = z.object({
-  dryRun: booleanQuerySchema.default('true'),
+  dryRun: booleanQuerySchema.default(true),
 });
 export type ImportQuery = z.infer<typeof importQuerySchema>;
 
@@ -1213,7 +1214,7 @@ export interface CouponDto {
 export interface CouponValidationResult {
   valid: boolean;
   code: string;
-  discountTotal: number; // piasters
+  discountTotal: number;
   reason?: string;
 }
 
