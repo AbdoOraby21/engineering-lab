@@ -39,8 +39,9 @@ export async function canConnect(port: number, host = '127.0.0.1'): Promise<bool
 function findBundledNativeDir(): string {
   const pnpmStore = path.join(repoRoot, 'node_modules', '.pnpm');
   if (existsSync(pnpmStore)) {
+    const platform = process.platform === 'win32' ? 'windows-x64' : process.platform === 'linux' ? 'linux-x64' : 'darwin-x64';
     const candidates = readdirSync(pnpmStore).filter((entry) =>
-      entry.startsWith('@embedded-postgres+windows-x64@'),
+      entry.startsWith(`@embedded-postgres+${platform}@`),
     );
     for (const entry of candidates) {
       const native = path.join(
@@ -48,16 +49,17 @@ function findBundledNativeDir(): string {
         entry,
         'node_modules',
         '@embedded-postgres',
-        'windows-x64',
+        platform,
         'native',
       );
-      if (existsSync(path.join(native, 'bin', 'initdb.exe'))) {
+      const executable = platform === 'windows-x64' ? 'initdb.exe' : 'initdb';
+      if (existsSync(path.join(native, 'bin', executable))) {
         return native;
       }
     }
   }
   throw new Error(
-    'Could not locate the bundled @embedded-postgres/windows-x64 binaries. Run `pnpm install` first. (The windows-x64 package is a devDependency that supplies initdb/pg_ctl for the embedded cluster.)',
+    'Could not locate the bundled @embedded-postgres binaries. Run `pnpm install` first. ',
   );
 }
 

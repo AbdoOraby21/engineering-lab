@@ -1,27 +1,25 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { ensureDatabases, ensureEmbeddedCluster, embeddedUrl } from './embedded-db.js';
-import { Client } from 'pg';
 
 const apiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const testDatabaseUrl = embeddedUrl('engineering_lab_test');
+
+// Use service PostgreSQL in CI, embedded for local development
+const isCi = process.env.GITHUB_ACTIONS === 'true';
+const testDatabaseUrl = isCi
+  ? 'postgresql://postgres@localhost:5432/engineering_lab_test?schema=public'
+  : 'postgresql://postgres@127.0.0.1:55433/engineering_lab_test?schema=public';
 
 export default async function globalSetup(): Promise<() => Promise<void>> {
-  const cluster = await ensureEmbeddedCluster();
-  await ensureDatabases(['engineering_lab', 'engineering_lab_test']);
-
-  // Recreate the test database from scratch so a previously failed migration
-  // record never blocks subsequent test runs (test-only infrastructure).
+  const { Client } = await import('pg');
   const adminClient = new Client({
-    host: '127.0.0.1',
-    port: 55433,
+    host: isCi ? 'localhost' : '127.0.0.1',
+    port: isCi ? 5432 : 55433,
     user: 'postgres',
     database: 'postgres',
   });
   await adminClient.connect();
   try {
-    await adminClient.query(`SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'engineering_lab_test' AND pid <> pg_backend_pid()`);
     await adminClient.query(`DROP DATABASE IF EXISTS "engineering_lab_test"`);
     await adminClient.query(`CREATE DATABASE "engineering_lab_test"`);
   } finally {
@@ -36,6 +34,6 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
   });
 
   return async () => {
-    await cluster.stop();
+    // No-op for service-based CI; local embedded cluster cleanup handled separately
   };
 }
