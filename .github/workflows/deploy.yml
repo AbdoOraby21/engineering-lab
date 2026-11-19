@@ -95,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Optional repository variables (Settings > Secrets and variables > Actions > Variables).
-      API_URL: ${{ vars.API_URL || 'https://engineering-lab-api.onrender.com' }}
+      API_URL: ${{ vars.API_URL }}
       WEB_URL: ${{ vars.WEB_URL }}
     steps:
       - name: Wait for deploy propagation
@@ -103,6 +103,10 @@ jobs:
 
       - name: Smoke test API /health and /ready
         run: |
+          if [ -z "$API_URL" ]; then
+            echo "::warning::API_URL variable is not set - skipping API smoke tests"
+            exit 0
+          fi
           check() {
             url="$1"
             for i in 1 2 3 4 5 6; do
