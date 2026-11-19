@@ -51,10 +51,13 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_DB: engineering_lab_test
+          POSTGRES_HOST_AUTH_METHOD: trust
         ports: ["5432:5432"]
         options: >-
-          --health-pg
           --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -73,10 +76,7 @@ jobs:
       - name: Generate Prisma Client
         run: pnpm --filter @engineering-lab/api prisma:generate
 
-      - name: Configure test database
-        run: |
-          psql -U postgres -c "DROP DATABASE IF EXISTS engineering_lab_test;" psql -U postgres -c "CREATE DATABASE engineering_lab_test;"
-
+      # test/globalSetup.ts drops/creates the test DB and runs `prisma migrate deploy`.
       - name: Run API tests
         env:
           DATABASE_URL: postgresql://postgres@localhost:5432/engineering_lab_test?schema=public

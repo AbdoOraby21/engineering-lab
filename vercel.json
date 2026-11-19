@@ -1,70 +1,41 @@
 {
-  "version": 2,
-  "builds": [
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm --filter @engineering-lab/web build",
+  "outputDirectory": "apps/web/dist",
+  "rewrites": [
     {
-      "src": "apps/web/.next/**",
-      "use": "@vercel/fs-edgemiddle"
+      "source": "/api/:path*",
+      "destination": "https://engineering-lab-api.onrender.com/api/:path*"
     },
     {
-      "src": "*/api/**",
-      "use": "Nodejs",
-      "config": {
-        "functionMemory": 1024,
-        "maxDuration": 30
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "https://engineering-lab-api.onrender.com/$1"
+      "source": "/sitemap.xml",
+      "destination": "https://engineering-lab-api.onrender.com/sitemap.xml"
     },
     {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "source": "/robots.txt",
+      "destination": "https://engineering-lab-api.onrender.com/robots.txt"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "https://engineering-lab-api.onrender.com/api/$1"
     },
     {
-      "source": "/sitemap.xml",
-      "destination": "/api/sitemap.xml"
-    },
-    {
-      "source": "/robots.txt",
-      "destination": "/api/robots.txt"
-    }
-  ],
-  "publicAssets": [
-    {
-      "glob": "apps/web/out/**/*.{png,jpg,jpeg,webp,svg,js,css}",
-      "category": "imagesAndFonts"
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
     }
   ]
 }

@@ -4,22 +4,41 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
 env:
   NODE_OPTIONS: --max-old-space-size=4096
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: engineering_lab_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-         run_install: false
+          run_install: false
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Generate Prisma Client
+        run: pnpm --filter @engineering-lab/api prisma:generate
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm --filter @engineering-lab/api test
@@ -32,49 +51,41 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-           run_install: false
+          run_install: false
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
+      # Migrate first, then roll out the new API code.
+      - name: Run Prisma migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          if [ -n "$DATABASE_URL" ]; then
+            pnpm --filter @engineering-lab/api prisma:deploy
+          else
+            echo "::warning::DATABASE_URL_PROD is not set - skipping migrations"
+          fi
+
       # Deploy to Render via deploy hook (set RENDER_DEPLOY_HOOK in secrets)
-      # To use Railway: `railway up` via Railway CLI (set RAILWAY_TOKEN in secrets)
       - name: Deploy API to Render
         env:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
           if [ -n "$RENDER_DEPLOY_HOOK" ]; then
-            curl -X POST "$RENDER_DEPLOY_HOOK"
+            curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
           else
-            echo "Skipping Render deploy (no hook set)"
+            echo "::warning::RENDER_DEPLOY_HOOK is not set - skipping Render deploy"
           fi
-
-      # Run Prisma migrate deploy
-      - name: Run Prisma migrations
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
-        run: |
-          pnpm --filter @engineering-lab/api prisma migrate deploy
 
   deploy-web:
     needs: deploy-api
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-           run_install: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-
-      # Vercel auto-deploys on git push to main (via GitHub Integration).
-      # No manual step needed if Vercel is connected to this repo.
-      - name: Trigger Vercel deployment
+      # Vercel auto-deploys on push to main via the GitHub Integration.
+      - name: Vercel deployment
         run: |
           echo "Vercel auto-deploys on push to main (via GitHub Integration)."
           echo "Ensure the Vercel project is connected to this GitHub repo."
@@ -82,50 +93,44 @@ jobs:
   post-deploy-smoke:
     needs: deploy-web
     runs-on: ubuntu-latest
+    env:
+      # Optional repository variables (Settings > Secrets and variables > Actions > Variables).
+      API_URL: ${{ vars.API_URL || 'https://engineering-lab-api.onrender.com' }}
+      WEB_URL: ${{ vars.WEB_URL }}
     steps:
-      - uses: actions/checkout@v4
-
       - name: Wait for deploy propagation
-        run: |
-          echo "Waiting 60s for deploy propagation..."
-          sleep 60
+        run: sleep 60
 
-      - name: Smoke test /health
+      - name: Smoke test API /health and /ready
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80/api/v1/health || echo "0")
-          if [ "$STATUS" -eq 200 ]; then
-            echo "✅ /health endpoint healthy"
-          else
-            echo "❌ /health returned $STATUS"
-            exit 1
-          fi
+          check() {
+            url="$1"
+            for i in 1 2 3 4 5 6; do
+              status=$(curl -s -o /dev/null -w "%{http_code}" "$url" || echo "0")
+              if [ "$status" = "200" ]; then
+                echo "OK $url"
+                return 0
+              fi
+              echo "Attempt $i: $url returned $status"
+              sleep 15
+            done
+            echo "::error::$url did not return 200"
+            return 1
+          }
+          check "$API_URL/api/v1/health"
+          check "$API_URL/api/v1/ready"
 
-      - name: Smoke test /ready
+      - name: Smoke test web (home and catalog)
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80/api/v1/ready || echo "0")
-          if [ "$STATUS" -eq 200 ]; then
-            echo "✅ /ready endpoint healthy"
-          else
-            echo "❌ /ready returned $STATUS"
-            exit 1
+          if [ -z "$WEB_URL" ]; then
+            echo "::warning::WEB_URL variable is not set - skipping web smoke tests"
+            exit 0
           fi
-
-      - name: Smoke test home page
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80/ || echo "0")
-          if [ "$STATUS" -eq 200 ]; then
-            echo "✅ Home page healthy"
-          else
-            echo "❌ Home page returned $STATUS"
-            exit 1
-          fi
-
-      - name: Smoke test product list
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80/catalog || echo "0")
-          if [ "$STATUS" -eq 200 ]; then
-            echo "✅ Product list healthy"
-          else
-            echo "❌ Product list returned $STATUS"
-            exit 1
-          fi
+          for path in "/" "/catalog"; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" "$WEB_URL$path" || echo "0")
+            if [ "$status" != "200" ]; then
+              echo "::error::$WEB_URL$path returned $status"
+              exit 1
+            fi
+            echo "OK $WEB_URL$path"
+          done
