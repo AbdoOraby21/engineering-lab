@@ -9,9 +9,12 @@ process.env.WEB_URL = 'http://localhost:5173';
 process.env.WEB_ORIGIN = 'http://localhost:5173';
 process.env.RATE_LIMIT_MAX = '10000';
 process.env.AUTH_RATE_LIMIT_MAX = '10000';
+// Keep in sync with test/globalSetup.ts: service Postgres in CI, embedded cluster locally.
 process.env.DATABASE_URL =
   process.env.TEST_DATABASE_URL ??
-  'postgresql://postgres@127.0.0.1:55433/engineering_lab_test?schema=public';
+  (process.env.GITHUB_ACTIONS === 'true'
+    ? 'postgresql://postgres@localhost:5432/engineering_lab_test?schema=public'
+    : 'postgresql://postgres@127.0.0.1:55433/engineering_lab_test?schema=public');
 
 process.on('unhandledRejection', (reason) => {
   console.error('UNHANDLED_REJECTION:', reason);
