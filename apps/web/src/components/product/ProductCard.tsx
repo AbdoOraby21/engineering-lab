@@ -11,6 +11,7 @@ import { useCompareStore } from '../../stores/compare.store';
 import { useUiStore } from '../../stores/ui.store';
 import { localizedAlt, localizedName, getCurrentLang } from '../../lib/localized';
 import { fetchProduct } from '../../lib/catalogApi';
+import { formatEGP } from '../../lib/format';
 
 interface ProductCardProps {
   product: ProductCardDto;
@@ -45,8 +46,7 @@ export default function ProductCard({ product, home = false }: ProductCardProps)
 
   if (home) {
     return (
-      <Link
-        to={`/${currentLang}/products/${product.slug}`}
+      <div
         className="group relative flex flex-col overflow-hidden rounded-[14px] border border-line bg-surface transition hover:border-brand/50"
         onMouseEnter={() => {
           void queryClient.prefetchQuery({
@@ -58,7 +58,7 @@ export default function ProductCard({ product, home = false }: ProductCardProps)
       >
         {/* Image area: pure white, object-contain, padded */}
         <div className="relative h-[235px] w-full overflow-hidden rounded-[14px] bg-white">
-          <div className="absolute inset-[14px] flex h-full w-full items-center justify-center">
+          <div className="absolute inset-[14px] flex items-center justify-center">
             {product.primaryImage ? (
               <>
                 <img
@@ -88,8 +88,14 @@ export default function ProductCard({ product, home = false }: ProductCardProps)
               </span>
             )}
           </div>
+          <Link
+            to={`/${currentLang}/products/${product.slug}`}
+            className="absolute inset-0"
+            aria-label={name}
+            tabIndex={-1}
+          />
           {/* Badges top-start */}
-          <span className="absolute start-3 top-3 flex flex-col gap-1.5">
+          <span className="pointer-events-none absolute start-3 top-3 flex flex-col gap-1.5">
             {onSale ? (
               <span className="badge bg-red-500/15 text-red-400" dir="ltr">
                 -{discount}%
@@ -140,7 +146,7 @@ export default function ProductCard({ product, home = false }: ProductCardProps)
 
           <Link
             to={`/${currentLang}/products/${product.slug}`}
-            className="line-clamp-2 min-h-[3rem] text-[15px] font-semibold leading-1.25 text-content transition hover:text-brand"
+            className="line-clamp-2 min-h-[3rem] text-[15px] font-semibold leading-snug text-content transition hover:text-brand"
           >
             {name}
           </Link>
@@ -148,10 +154,10 @@ export default function ProductCard({ product, home = false }: ProductCardProps)
           <div className="mt-auto flex items-end justify-between gap-2 pt-2">
             <div className="flex min-w-0 flex-col">
               <div className="flex items-baseline gap-1">
-                <span className="text-brand font-bold text-[18px]">{formatPrice(product.price)}</span>
+                <span className="text-brand font-bold text-[18px]">{formatEGP(product.price, currentLang)}</span>
                 {onSale ? (
                   <span className="text-muted text-[13px] line-through">
-                    {formatPrice(product.compareAtPrice!)}
+                    {formatEGP(product.compareAtPrice!, currentLang)}
                   </span>
                 ) : null}
               </div>
@@ -171,7 +177,7 @@ export default function ProductCard({ product, home = false }: ProductCardProps)
             </button>
           </div>
         </div>
-      </Link>
+      </div>
     );
   }
 
@@ -314,8 +320,4 @@ export default function ProductCard({ product, home = false }: ProductCardProps)
       </div>
     </div>
   );
-}
-
-function formatPrice(piasters: number): string {
-  return new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP' }).format(piasters / 100);
 }

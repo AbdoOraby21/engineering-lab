@@ -1,4 +1,4 @@
-import React, { ComponentType, Fragment, useEffect, useState } from 'react';
+import React, { ComponentType, Fragment, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -105,7 +105,7 @@ export default function HomePage() {
     staleTime: 60_000,
   });
 
-  const banners = bannersQuery.data ?? [];
+  const banners = useMemo(() => bannersQuery.data ?? [], [bannersQuery.data]);
   const activeBanner = banners[bannerIndex] ?? banners[0];
   const rootCategories = (categoriesQuery.data ?? []).filter((category) => !category.parentId);
 
@@ -149,7 +149,7 @@ export default function HomePage() {
     return (
       <>
         {before}
-        <span className="text-brand italic rtl:not-italic">{highlight}</span>
+        <span className="text-brand">{highlight}</span>
         {after}
       </>
     );
@@ -162,47 +162,35 @@ export default function HomePage() {
         description={t('home.heroSubtitle')}
         jsonLd={organizationJsonLd()}
       />
-      <section className="relative overflow-hidden min-h-[370px] w-full" style={{ backgroundColor: '#050d0a' }}>
-        {/* Radial glows */}
-        <div className="absolute top-[40%] left-[25%] w-[600px] h-[600px] rounded-full bg-brand/20 blur-[120px] mix-blend-overlay" />
-        <div className="absolute top-[10%] left-[55%] w-[520px] h-[520px] rounded-full bg-brand/15 blur-[100px] mix-blend-overlay" />
-        {/* Circuit-board trace pattern */}
-        <div className="absolute inset-0 opacity-[0.35]" aria-hidden="true">
-          <svg width="100%" height="100%" viewBox="0 0 240 240" preserveAspectRatio="none" fill="none">
-            <path
-              d="M20 40h60v20h-60z M120 80l-40 0 0-40 M160 120h-40v20h40z M20 180h80v20h-80z M200 160l-60 0 0 20 M40 200v-40h20v40z"
-              stroke="#22C55E"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              opacity="0.5"
-            />
-          </svg>
-        </div>
-        {/* Bottom fade to page background */}
-        <div className="absolute bottom-0 left-0 right-0 h-[40px] bg-gradient-to-t from-[#050d0a] to-transparent" />
-        <div className="container-page relative min-h-[370px] flex items-center">
-          {/* Left content block */}
-          <div className="flex-1 relative z-10 ps-[58px] pe-[80px] text-start">
-            <span className="inline-block mb-3 rounded-full border border-brand/30 bg-brand-soft px-3 py-1 text-xs font-medium text-brand">
-              {activeBanner ? bannerTitle(activeBanner) : t('home.heroBadge')}
+      <section className="relative w-full overflow-hidden bg-[#050d0a]">
+        <div
+          className="pointer-events-none absolute -start-24 top-1/3 h-[420px] w-[420px] rounded-full bg-brand/20 blur-[110px]"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute end-0 top-0 h-[360px] w-[360px] rounded-full bg-brand/15 blur-[100px]"
+          aria-hidden="true"
+        />
+        <div className="hero-grid pointer-events-none absolute inset-0 opacity-30" aria-hidden="true" />
+        <div className="container-page relative grid items-center gap-8 py-10 sm:py-14 lg:min-h-[420px] lg:grid-cols-2 lg:gap-12 lg:py-12">
+          <div className="relative z-10 text-start">
+            <span className="inline-block rounded-full border border-brand/30 bg-brand-soft px-3 py-1 text-xs font-medium text-brand">
+              {t('home.heroBadge')}
             </span>
-            <h1 className="mt-4 text-[84px] font-bold leading-[1.1] tracking-tight text-content italic [dir=rtl]:not-italic">
+            <h1 className="mt-4 text-4xl font-bold leading-[1.15] text-white sm:text-5xl lg:text-6xl rtl:leading-[1.35]">
               {activeBanner ? bannerTitle(activeBanner) : t('home.heroTitle')}{' '}
               <span className="text-brand">
                 {activeBanner ? bannerHighlight(activeBanner) : t('home.heroHighlight')}
               </span>
             </h1>
-            <p className="mt-4 text-[31px] font-semibold leading-[1.5] text-content max-w-[720px] [dir=rtl]:max-w-none [dir=rtl]:text-end">
+            <p className="mt-4 max-w-xl text-base leading-8 text-white/85 sm:text-lg">
               {renderHeroSubtitle()}
             </p>
-            <p className="mt-5 italic text-[26px] leading-[1.5] text-content/90 max-w-[720px] [dir=rtl]:not-italic [dir=rtl]:max-w-none [dir=rtl]:text-end">
-              {t('home.heroFeatures')}
-            </p>
-            <div className="mt-10 flex items-center gap-4">
+            <p className="mt-3 text-sm font-medium text-white/60">{t('home.heroFeatures')}</p>
+            <div className="mt-8 flex items-center gap-4">
               <Link
                 to={`/${currentLang}/catalog`}
-                className="flex items-center gap-2 rounded-[10px] px-8 py-[17px] bg-gradient-to-b from-brand via-brand-hover text-white font-bold text-[22px] shadow-[0_0_24px_rgba(34,197,94,0.35)] transition hover:-translate-y-[1px] hover:shadow-glow"
+                className="btn-primary inline-flex items-center gap-2 px-7 py-3 text-base shadow-glow"
               >
                 <ShoppingCart className="h-5 w-5" />
                 {t('home.shopNow')}
@@ -211,65 +199,36 @@ export default function HomePage() {
             </div>
 
             {banners.length > 1 ? (
-              <div className="mt-12 flex items-center gap-2">
-                <button
-                  type="button"
-                  className="h-4 w-4 rounded-full bg-[#4B5560] hover:bg-muted transition"
-                  aria-label={t('pagination.previous')}
-                  onClick={() =>
-                    setBannerIndex((index) => (index - 1 + banners.length) % banners.length)
-                  }
-                  disabled={bannerIndex === 0}
-                  aria-hidden={bannerIndex === 0 || undefined}
-                />
+              <div className="mt-8 flex items-center gap-2" role="tablist">
                 {banners.map((banner, index) => (
                   <button
                     key={banner.id}
                     type="button"
+                    role="tab"
+                    aria-selected={index === bannerIndex}
                     aria-label={bannerTitle(banner)}
                     onClick={() => setBannerIndex(index)}
-                    className={`h-[16px] w-[16px] rounded-full transition-all ${
-                      index === bannerIndex ? 'w-[16px] bg-brand shadow-[0_0_12px_rgba(34,197,94,0.6)]' : 'w-[6px] h-[6px] bg-[#4B5560] hover:bg-muted'
+                    className={`h-2 rounded-full transition-all ${
+                      index === bannerIndex
+                        ? 'w-6 bg-brand shadow-[0_0_12px_rgba(34,197,94,0.6)]'
+                        : 'w-2 bg-white/30 hover:bg-white/50'
                     }`}
                   />
                 ))}
-                <button
-                  type="button"
-                  className="h-4 w-4 rounded-full bg-[#4B5560] hover:bg-muted transition"
-                  aria-label={t('pagination.next')}
-                  onClick={() => setBannerIndex((index) => (index + 1) % banners.length)}
-                  disabled={bannerIndex === banners.length - 1}
-                  aria-hidden={bannerIndex === banners.length - 1 || undefined}
-                />
               </div>
             ) : null}
           </div>
 
-          {/* Right product composition image */}
-          <div className={`flex-1 relative z-10 h-full ${isRtl ? 'items-start justify-start' : 'items-end justify-end'}`}>
-            <div className="relative w-[880px] h-[370px] shrink-0">
-              {activeBanner?.imageUrl ? (
-                <img
-                  src={activeBanner.imageUrl}
-                  alt={bannerTitle(activeBanner)}
-                  loading="eager"
-                  fetchPriority="high"
-                  width={880}
-                  height={370}
-                  className="absolute right-0 bottom-0 w-full h-full max-w-[880px] max-h-[370px] object-contain"
-                />
-              ) : (
-                <img
-                  src="/images/hero/hero-components.svg"
-                  alt="Electronics components composition"
-                  loading="eager"
-                  fetchPriority="high"
-                  width={880}
-                  height={370}
-                  className="absolute right-0 bottom-0 w-full h-full max-w-[880px] max-h-[370px] object-contain"
-                />
-              )}
-            </div>
+          <div className="relative z-10 mx-auto w-full max-w-[640px] lg:max-w-none">
+            <img
+              src={activeBanner?.imageUrl || '/images/hero/hero-components.svg'}
+              alt={activeBanner ? bannerTitle(activeBanner) : ''}
+              loading="eager"
+              fetchPriority="high"
+              width={880}
+              height={370}
+              className="h-auto w-full object-contain [mask-image:radial-gradient(ellipse_at_center,#000_55%,transparent_100%)]"
+            />
           </div>
         </div>
       </section>
@@ -300,9 +259,9 @@ export default function HomePage() {
           </Link>
         </div>
         {categoriesQuery.isLoading ? (
-          <div className="flex flex-row gap-2">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
             {Array.from({ length: 8 }).map((_, index) => (
-              <Skeleton key={index} className="flex-initial h-[117px] min-w-[150px] rounded-[14px]" />
+              <Skeleton key={index} className="h-[117px] rounded-[14px]" />
             ))}
           </div>
         ) : rootCategories.length === 0 ? (
@@ -310,14 +269,14 @@ export default function HomePage() {
             <p className="text-muted">{t('home.featuredEmpty')}</p>
           </div>
         ) : (
-          <div className="flex flex-row gap-2">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
             {rootCategories.slice(0, 7).map((category) => {
               const Icon = categoryIcons[category.slug] ?? MoreIcon;
               return (
                 <Link
                   key={category.id}
                   to={`/${currentLang}/catalog?category=${category.slug}`}
-                  className="flex-initial flex flex-col items-center gap-2 rounded-[14px] border border-line bg-surface px-3 py-3 text-center transition group-hover:border-brand group-hover:shadow-glow"
+                  className="group flex flex-col items-center gap-2 rounded-[14px] border border-line bg-surface px-3 py-4 text-center transition hover:border-brand hover:shadow-glow"
                 >
                   <span className="flex h-[52px] w-[52px] items-center justify-center rounded-xl text-brand transition group-hover:scale-105 duration-200">
                     {category.imageUrl ? (
@@ -330,7 +289,7 @@ export default function HomePage() {
                       <Icon className="h-[34px] w-[34px]" />
                     )}
                   </span>
-                  <span className="text-[15px] font-medium leading-1.25 text-content max-w-[190px] lines-2">
+                  <span className="text-[15px] font-medium leading-snug text-content max-w-[190px] line-clamp-2">
                     {localizedName(category, currentLang)}
                   </span>
                 </Link>
@@ -338,12 +297,12 @@ export default function HomePage() {
             })}
             <Link
               to={`/${currentLang}/catalog`}
-              className="flex-initial flex flex-col items-center justify-center gap-2 rounded-[14px] border border-line bg-surface px-3 py-3 text-center transition group-hover:border-brand group-hover:shadow-glow"
+              className="group flex flex-col items-center justify-center gap-2 rounded-[14px] border border-line bg-surface px-3 py-4 text-center transition hover:border-brand hover:shadow-glow"
             >
               <span className="flex h-[52px] w-[52px] items-center justify-center rounded-xl text-brand transition group-hover:scale-105 duration-200">
                 <MoreIcon className="h-[34px] w-[34px]" />
               </span>
-              <span className="text-[15px] font-medium leading-1.25 text-content max-w-[190px] lines-2">
+              <span className="text-[15px] font-medium leading-snug text-content max-w-[190px] line-clamp-2">
                 {t('categories.more')}
               </span>
             </Link>
@@ -365,6 +324,8 @@ export default function HomePage() {
         subtitle={t('home.newArrivalsSubtitle')}
         products={newArrivalsQuery.data ?? []}
         viewAllHref={`/${currentLang}/catalog?sort=newest`}
+        home
+        hideWhenEmpty
         loading={newArrivalsQuery.isLoading}
       />
 
@@ -373,6 +334,8 @@ export default function HomePage() {
         subtitle={t('home.bestSellersSubtitle')}
         products={bestSellersQuery.data ?? []}
         viewAllHref={`/${currentLang}/catalog?sort=popular`}
+        home
+        hideWhenEmpty
         loading={bestSellersQuery.isLoading}
       />
 
@@ -381,6 +344,8 @@ export default function HomePage() {
         subtitle={t('home.bundlesSubtitle')}
         products={bundlesQuery.data ?? []}
         viewAllHref={`/${currentLang}/catalog?q=kit`}
+        home
+        hideWhenEmpty
         loading={bundlesQuery.isLoading}
       />
 
@@ -400,17 +365,17 @@ export default function HomePage() {
 
       <section className="container-page py-14">
         <div className="rounded-[14px] border border-line bg-surface px-4">
-          <div className="flex items-center justify-between h-[62px]">
+          <div className="grid grid-cols-2 gap-4 py-4 lg:flex lg:h-[62px] lg:items-center lg:justify-between lg:py-0">
             {trustItems.map((item, index) => (
               <Fragment key={item.key}>
-                <div className="flex-1 flex items-center justify-center gap-2 text-center">
-                  <item.icon className="h-[38px] w-[38px] text-brand" />
-                  <span className="text-[17px] font-medium text-content">
+                <div className="flex flex-1 items-center justify-center gap-2 text-center">
+                  <item.icon className="h-8 w-8 shrink-0 text-brand" />
+                  <span className="text-[15px] font-medium text-content">
                     {t(`home.trust.${item.key}`)}
                   </span>
                 </div>
                 {index < trustItems.length - 1 && (
-                  <div className="hidden w-px h-[36px] bg-border lg:block" />
+                  <div className="hidden w-px h-[36px] bg-line lg:block" />
                 )}
               </Fragment>
             ))}

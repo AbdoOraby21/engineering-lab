@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -33,13 +33,6 @@ const navItems = [
   { key: 'common.support', to: 'support' },
 ] as const;
 
-type SearchSuggestion = {
-  id: string | number;
-  slug: string;
-  nameEn: string;
-  nameAr?: string;
-};
-
 export default function Header() {
   const { t } = useTranslation();
   const { lang } = useParams<{ lang: string }>();
@@ -59,25 +52,6 @@ export default function Header() {
   const [query, setQuery] = useState('');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(async () => {
-      try {
-        const res = await fetch(`/search/suggest?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
-        setSuggestions(data.suggestions || []);
-        setIsOpen(data.suggestions?.length > 0);
-      } catch {
-        setSuggestions([]);
-        setIsOpen(false);
-      }
-    }, 300);
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [query]);
 
   const categoriesQuery = useQuery({
     queryKey: ['categories'],
@@ -114,65 +88,17 @@ export default function Header() {
   const cartTotal = cartCount(cartItems);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-bg h-auto md:h-[143px]">
-      <div className="container-page flex h-20 md:h-[143px] items-center gap-3 lg:gap-6">
-        {/* Logo block */}
+    <header className="sticky top-0 z-40 border-b border-line bg-bg">
+      <div className="container-page flex h-16 items-center gap-3 sm:h-[72px] lg:gap-6">
         <Logo size="lg" />
 
-        {/* Vertical divider */}
-        <span className="hidden sm:w-px sm:h-[80px] bg-border mx-1" />
-
-        {/* Search pill */}
         <form
           role="search"
           onSubmit={handleSearchSubmit}
-          className="hidden sm:flex min-w-0 w-full max-w-[686px] mx-0"
+          className="hidden min-w-0 flex-1 sm:block sm:max-w-[560px]"
         >
-          <div className="relative flex w-full items-center rounded-full bg-surface2 px-3 py-[17px] focus-within:ring-2 focus-within:ring-brand focus-within:shadow-[0_0_24px_rgba(34,197,94,0.35)] transition-all duration-200">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted/85">
-              <svg className="h-[26px] w-[26px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-            </span>
-<input
-                id="header-search"
-                type="search"
-                role="combobox"
-                aria-controls="suggestions-list"
-                aria-expanded={isOpen}
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                }}
-                className="w-full bg-transparent text-[20px] text-muted placeholder:text-muted placeholder-opacity-100 pr-10 pl-[48px] outline-none"
-                placeholder={t('header.searchPlaceholder')}
-              />
-          </div>
-</form>
-
-        {isOpen && suggestions.length > 0 && (
-          <div
-            role="listbox"
-            id="suggestions-list"
-            className="absolute top-full left-0 w-full max-w-[686px] bg-white dark:bg-gray-800 rounded-b-md py-2 z-20 shadow-lg m-0"
-          >
-            {suggestions.map((s) => (
-              <div
-                key={s.id}
-                role="option"
-                className="flex items-center px-3 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                onClick={() => {
-                  navigate(`/${currentLang}/products/${s.slug}`);
-                  setIsOpen(false);
-                }}
-              >
-                <span className="font-medium">{s.nameEn}</span>
-                {s.nameAr && <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">{s.nameAr}</span>}
-              </div>
-            ))}
-          </div>
-        )}
+          <SearchAutocomplete id="header-search" value={query} onChange={setQuery} onSubmit={submitSearch} />
+        </form>
 
         <div className="ms-auto flex items-center gap-2">
           <LanguageSwitcher />
@@ -245,14 +171,18 @@ export default function Header() {
             </div>
           ) : (
             <div className="hidden items-center gap-2 sm:flex">
-              <span className="flex h-[34px] items-center gap-2 rounded-full border border-line bg-surface px-2 py-[12px] text-sm font-medium text-content transition hover:bg-surface2">
-                <svg className="h-[34px] w-[34px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-                <span>Login /</span>
-                <span>Register</span>
-              </span>
+              <Link
+                to={`/${currentLang}/login`}
+                className="btn-secondary h-10 whitespace-nowrap px-4 py-0 text-sm"
+              >
+                {t('common.login')}
+              </Link>
+              <Link
+                to={`/${currentLang}/register`}
+                className="btn-primary h-10 whitespace-nowrap px-4 py-0 text-sm"
+              >
+                {t('common.register')}
+              </Link>
             </div>
           )}
 
@@ -272,14 +202,19 @@ export default function Header() {
           <button
             type="button"
             onClick={() => setCartOpen(true)}
-            className="relative"
+            className="icon-btn relative"
             aria-label={`${t('common.cart')}: ${cartTotal}`}
             aria-live="polite"
           >
-            <ShoppingCart className="h-[42px] w-[42px]" />
-            <span className={`absolute -end-[6px] -top-[10px] flex h-[34px] min-w-[34px] items-center justify-center rounded-full bg-brand text-[#06110A] text-[17px] font-bold border border-white/40`}>
-              {cartTotal > 0 ? cartTotal : 0}
-            </span>
+            <ShoppingCart className="h-4 w-4" />
+            {cartTotal > 0 ? (
+              <span
+                className="absolute -end-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-brand-fg"
+                dir="ltr"
+              >
+                {cartTotal}
+              </span>
+            ) : null}
           </button>
 
           <button
@@ -294,7 +229,7 @@ export default function Header() {
         </div>
       </div>
 
-      <form role="search" onSubmit={handleSearchSubmit} className="pb-3 md:hidden">
+      <form role="search" onSubmit={handleSearchSubmit} className="pb-3 sm:hidden">
         <SearchAutocomplete id="mobile-search" value={query} onChange={setQuery} onSubmit={submitSearch} />
       </form>
 

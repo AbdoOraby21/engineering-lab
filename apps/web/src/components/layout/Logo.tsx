@@ -14,19 +14,19 @@ interface LogoProps {
 const EMBLEM_CLASSES: Record<LogoSize, string> = {
   sm: 'h-9 w-9',
   md: 'h-12 w-12',
-  lg: 'h-11 w-11 sm:h-[88px] sm:w-[88px]',
+  lg: 'h-10 w-10 sm:h-12 sm:w-12',
 };
 
 const TITLE_CLASSES: Record<LogoSize, string> = {
   sm: 'text-base whitespace-nowrap',
   md: 'text-xl whitespace-nowrap',
-  lg: 'text-xs leading-tight sm:text-[42px] sm:leading-none sm:whitespace-nowrap',
+  lg: 'text-sm leading-tight sm:text-xl sm:leading-none sm:whitespace-nowrap',
 };
 
 const TAGLINE_CLASSES: Record<LogoSize, string> = {
   sm: 'text-[9px] whitespace-nowrap',
   md: 'text-[11px] whitespace-nowrap',
-  lg: 'hidden sm:block sm:text-[15px] sm:whitespace-nowrap',
+  lg: 'hidden sm:block sm:text-[11px] sm:whitespace-nowrap',
 };
 
 const TEXT_VISIBILITY: Record<LogoSize, string> = {

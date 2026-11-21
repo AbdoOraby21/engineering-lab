@@ -139,9 +139,9 @@ export default function LoginPage() {
         </button>
       </form>
       <div className="flex items-center gap-3 py-1">
-        <span className="h-px flex-1 bg-border" />
+        <span className="h-px flex-1 bg-line" />
         <span className="text-xs text-muted">{t('auth.or')}</span>
-        <span className="h-px flex-1 bg-border" />
+        <span className="h-px flex-1 bg-line" />
       </div>
       <GoogleButton
         locale={currentLang}
