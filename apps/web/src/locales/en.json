@@ -316,8 +316,8 @@
     "sendAnother": "Send another message"
   },
   "pagination": {
-    "next": "",
-    "previous": ""
+    "next": "Next",
+    "previous": "Previous"
   },
   "product": {
     "addToWishlist": "Add to Wishlist",
@@ -352,39 +352,39 @@
     "datasheet": "Datasheet"
   },
   "support": {
-    "backToTickets": "",
-    "category": "",
-    "contactInfo": "",
-    "created": "",
-    "empty": "",
-    "faqBody": "",
-    "faqTitle": "",
-    "hours": "",
-    "location": "",
-    "loginPrompt": "",
-    "message": "",
-    "messageCount": "",
-    "myTickets": "",
-    "newTicket": "",
-    "notFound": "",
-    "openedOn": "",
-    "orderReference": "",
-    "reply": "",
-    "replyPlaceholder": "",
-    "send": "",
-    "sendReply": "",
-    "staff": "",
-    "subject": "",
-    "subtitle": "",
-    "title": "",
-    "unknownSender": "",
-    "validationError": "",
+    "backToTickets": "Back to tickets",
+    "category": "Category",
+    "contactInfo": "Contact information",
+    "created": "Created",
+    "empty": "You have no tickets yet.",
+    "faqBody": "Check the FAQ first — you may find your answer right away.",
+    "faqTitle": "Frequently asked questions",
+    "hours": "Working hours",
+    "location": "Location",
+    "loginPrompt": "Please log in to open or follow support tickets.",
+    "message": "Message",
+    "messageCount": "{{count}} messages",
+    "myTickets": "My tickets",
+    "newTicket": "New ticket",
+    "notFound": "Ticket not found.",
+    "openedOn": "Opened on {{date}}",
+    "orderReference": "Order reference (optional)",
+    "reply": "Reply",
+    "replyPlaceholder": "Write your reply…",
+    "send": "Send",
+    "sendReply": "Send reply",
+    "staff": "Support team",
+    "subject": "Subject",
+    "subtitle": "Open a ticket and our team will get back to you.",
+    "title": "Support",
+    "unknownSender": "Unknown",
+    "validationError": "Please enter a subject and a message.",
     "categories": {
-      "ORDER": "",
-      "PAYMENT": "",
-      "PRODUCT": "",
-      "SHIPPING": "",
-      "OTHER": ""
+      "ORDER": "Order",
+      "PAYMENT": "Payment",
+      "PRODUCT": "Product",
+      "SHIPPING": "Shipping",
+      "OTHER": "Other"
     },
     "status": {
       "OPEN": "Open",
@@ -398,9 +398,9 @@
     "closed": "Ticket closed"
   },
   "wishlist": {
-    "empty": "",
-    "subtitle": "",
-    "title": ""
+    "empty": "Your wishlist is empty.",
+    "subtitle": "{{count}} saved items",
+    "title": "Wishlist"
   },
   "search": {
     "recent": "Recent searches",
