@@ -153,8 +153,8 @@ export default function ProductCard({ product, home = false }: ProductCardProps)
 
           <div className="mt-auto flex items-end justify-between gap-2 pt-2">
             <div className="flex min-w-0 flex-col">
-              <div className="flex items-baseline gap-1">
-                <span className="text-brand font-bold text-[18px]">{formatEGP(product.price, currentLang)}</span>
+              <div className="flex flex-wrap items-baseline gap-x-1.5">
+                <span className="text-brand font-bold text-base sm:text-[18px]">{formatEGP(product.price, currentLang)}</span>
                 {onSale ? (
                   <span className="text-muted text-[13px] line-through">
                     {formatEGP(product.compareAtPrice!, currentLang)}
