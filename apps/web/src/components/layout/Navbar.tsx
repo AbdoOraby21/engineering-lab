@@ -2,15 +2,15 @@ import { useState } from 'react';
 import { Link, useParams, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown, Truck } from 'lucide-react';
+import { ChevronDown, Headphones, House, Info, LayoutGrid, Mail, Truck } from 'lucide-react';
 import { listCategories } from '../../lib/catalogApi';
 import { localizedName } from '../../lib/localized';
 
 const links = [
-  { key: 'common.home', to: '' },
-  { key: 'common.about', to: 'about' },
-  { key: 'common.contact', to: 'contact' },
-  { key: 'common.support', to: 'support' },
+  { key: 'common.home', to: '', icon: House },
+  { key: 'common.about', to: 'about', icon: Info },
+  { key: 'common.contact', to: 'contact', icon: Mail },
+  { key: 'common.support', to: 'support', icon: Headphones },
 ] as const;
 
 export default function Navbar() {
@@ -28,22 +28,42 @@ export default function Navbar() {
   const categories = categoriesQuery.data ?? [];
 
   const linkClass = (isActive: boolean) =>
-    `rounded-[10px] px-3 py-2 text-sm font-medium transition ${
-      isActive ? 'bg-surface text-brand' : 'text-content hover:bg-surface hover:text-brand'
+    `flex shrink-0 items-center gap-2 whitespace-nowrap rounded-[10px] px-3.5 py-2 text-sm font-medium transition ${
+      isActive ? 'bg-brand text-brand-fg' : 'text-content hover:bg-surface2 hover:text-brand'
     }`;
 
   return (
-    <div className="relative z-30 hidden border-b border-line bg-bg lg:block">
-      <div className="container-page flex h-12 items-center gap-1">
-        <div className="relative">
+    <div className="container-page relative z-30 pb-3">
+      <div className="flex items-center gap-1 overflow-x-auto rounded-2xl bg-surface p-1.5 [-ms-overflow-style:none] [scrollbar-width:none] lg:overflow-visible [&::-webkit-scrollbar]:hidden">
+        {links.slice(0, 1).map((item) => (
+          <NavLink
+            key={item.key}
+            end
+            to={`/${currentLang}`}
+            className={({ isActive }: { isActive: boolean }) => linkClass(isActive)}
+          >
+            <item.icon className="h-4 w-4" />
+            {t(item.key)}
+          </NavLink>
+        ))}
+
+        <Link
+          to={`/${currentLang}/catalog`}
+          className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-[10px] px-3.5 py-2 text-sm font-medium text-content transition hover:bg-surface2 hover:text-brand lg:hidden"
+        >
+          <LayoutGrid className="h-4 w-4" />
+          {t('common.categories')}
+        </Link>
+
+        <div className="relative hidden lg:block">
           <button
             type="button"
-            className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm font-medium text-content transition hover:bg-surface hover:text-brand"
+            className="flex items-center gap-2 rounded-[10px] px-3.5 py-2 text-sm font-medium text-content transition hover:bg-surface2 hover:text-brand"
             aria-expanded={megaOpen}
             aria-haspopup="menu"
             onClick={() => setMegaOpen((open) => !open)}
           >
-            <GridIcon className="h-4 w-4" />
+            <LayoutGrid className="h-4 w-4" />
             <span>{t('common.categories')}</span>
             <ChevronDown
               className={`h-3.5 w-3.5 transition-transform ${megaOpen ? 'rotate-180' : ''}`}
@@ -102,44 +122,25 @@ export default function Navbar() {
           ) : null}
         </div>
 
-        {links.map((item) => (
+        {links.slice(1).map((item) => (
           <NavLink
             key={item.key}
-            end={item.to === ''}
-            to={item.to ? `/${currentLang}/${item.to}` : `/${currentLang}`}
+            to={`/${currentLang}/${item.to}`}
             className={({ isActive }: { isActive: boolean }) => linkClass(isActive)}
           >
+            <item.icon className="h-4 w-4" />
             {t(item.key)}
           </NavLink>
         ))}
 
         <Link
           to={`/${currentLang}/support`}
-          className="ms-auto flex items-center gap-2 rounded-full border border-brand/40 bg-brand/10 px-3 py-1.5 text-sm font-semibold text-brand transition hover:bg-brand/15"
+          className="ms-auto hidden items-center gap-2 rounded-full lg:flex border border-brand/40 bg-brand/10 px-3 py-1.5 text-sm font-semibold text-brand transition hover:bg-brand/15"
         >
           <Truck className="h-4 w-4" />
           <span>{t('common.fastDelivery')}</span>
         </Link>
       </div>
     </div>
-  );
-}
-
-function GridIcon({ className = '' }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <rect x="3" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="14" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" />
-    </svg>
   );
 }

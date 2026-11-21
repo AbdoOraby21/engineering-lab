@@ -163,73 +163,82 @@ export default function HomePage() {
         jsonLd={organizationJsonLd()}
       />
       <section className="relative w-full overflow-hidden bg-[#050d0a]">
-        <div
-          className="pointer-events-none absolute -start-24 top-1/3 h-[420px] w-[420px] rounded-full bg-brand/20 blur-[110px]"
-          aria-hidden="true"
-        />
-        <div
-          className="pointer-events-none absolute end-0 top-0 h-[360px] w-[360px] rounded-full bg-brand/15 blur-[100px]"
-          aria-hidden="true"
-        />
         <div className="hero-grid pointer-events-none absolute inset-0 opacity-30" aria-hidden="true" />
-        <div className="container-page relative grid items-center gap-8 py-10 sm:py-14 lg:min-h-[420px] lg:grid-cols-2 lg:gap-12 lg:py-12">
-          <div className="relative z-10 text-start">
-            <span className="inline-block rounded-full border border-brand/30 bg-brand-soft px-3 py-1 text-xs font-medium text-brand">
-              {t('home.heroBadge')}
-            </span>
-            <h1 className="mt-4 text-4xl font-bold leading-[1.15] text-white sm:text-5xl lg:text-6xl rtl:leading-[1.35]">
-              {activeBanner ? bannerTitle(activeBanner) : t('home.heroTitle')}{' '}
-              <span className="text-brand">
-                {activeBanner ? bannerHighlight(activeBanner) : t('home.heroHighlight')}
-              </span>
-            </h1>
-            <p className="mt-4 max-w-xl text-base leading-8 text-white/85 sm:text-lg">
-              {renderHeroSubtitle()}
-            </p>
-            <p className="mt-3 text-sm font-medium text-white/60">{t('home.heroFeatures')}</p>
-            <div className="mt-8 flex items-center gap-4">
+        <div
+          className="pointer-events-none absolute -start-24 top-0 h-[360px] w-[360px] rounded-full bg-brand/20 blur-[110px]"
+          aria-hidden="true"
+        />
+        <div className="relative lg:min-h-[368px]">
+          <div className="pointer-events-none absolute inset-y-0 end-0 hidden w-[58%] rtl:end-auto rtl:start-0 lg:block" aria-hidden="true">
+            <img
+              src={activeBanner?.imageUrl || '/images/hero/hero-photo.jpg'}
+              alt=""
+              loading="eager"
+              fetchPriority="high"
+              className="h-full w-full object-cover object-left rtl:object-right [mask-image:linear-gradient(to_right,transparent,#000_30%)] rtl:[mask-image:linear-gradient(to_right,#000_70%,transparent)]"
+            />
+          </div>
+          <div className="container-page relative z-10 py-8 sm:py-10 lg:flex lg:min-h-[368px] lg:items-center">
+            <div className="text-start lg:max-w-[52%]">
+              <h1 className="text-[40px] font-extrabold leading-[1.1] text-white sm:text-6xl rtl:leading-[1.3]">
+                {activeBanner ? (
+                  <>
+                    {bannerTitle(activeBanner)}{' '}
+                    <span className="text-brand">{bannerHighlight(activeBanner)}</span>
+                  </>
+                ) : (
+                  <>
+                    Engineering <span className="text-brand">Lab</span>
+                  </>
+                )}
+              </h1>
+              <p className="mt-3 text-lg font-semibold leading-snug text-white sm:text-2xl">
+                {activeBanner ? (
+                  renderHeroSubtitle()
+                ) : (
+                  <>
+                    {t('home.heroTagline').split(t('home.heroTaglineHighlight'))[0]}
+                    <span className="text-brand">{t('home.heroTaglineHighlight')}</span>
+                  </>
+                )}
+              </p>
+              <p className="mt-3 text-sm font-medium text-white/75 sm:text-lg">{t('home.heroFeatures')}</p>
               <Link
                 to={`/${currentLang}/catalog`}
-                className="btn-primary inline-flex items-center gap-2 px-7 py-3 text-base shadow-glow"
+                className="btn-primary mt-6 inline-flex items-center gap-2 px-7 py-3 text-base shadow-glow"
               >
                 <ShoppingCart className="h-5 w-5" />
                 {t('home.shopNow')}
                 <Arrow className="h-5 w-5" />
               </Link>
+
+              {banners.length > 1 ? (
+                <div className="mt-6 flex items-center gap-2" role="tablist">
+                  {banners.map((banner, index) => (
+                    <button
+                      key={banner.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={index === bannerIndex}
+                      aria-label={bannerTitle(banner)}
+                      onClick={() => setBannerIndex(index)}
+                      className={`h-2 rounded-full transition-all ${
+                        index === bannerIndex
+                          ? 'w-6 bg-brand shadow-[0_0_12px_rgba(34,197,94,0.6)]'
+                          : 'w-2 bg-white/30 hover:bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+              ) : null}
             </div>
-
-            {banners.length > 1 ? (
-              <div className="mt-8 flex items-center gap-2" role="tablist">
-                {banners.map((banner, index) => (
-                  <button
-                    key={banner.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={index === bannerIndex}
-                    aria-label={bannerTitle(banner)}
-                    onClick={() => setBannerIndex(index)}
-                    className={`h-2 rounded-full transition-all ${
-                      index === bannerIndex
-                        ? 'w-6 bg-brand shadow-[0_0_12px_rgba(34,197,94,0.6)]'
-                        : 'w-2 bg-white/30 hover:bg-white/50'
-                    }`}
-                  />
-                ))}
-              </div>
-            ) : null}
           </div>
-
-          <div className="relative z-10 mx-auto w-full max-w-[640px] lg:max-w-none">
-            <img
-              src={activeBanner?.imageUrl || '/images/hero/hero-components.svg'}
-              alt={activeBanner ? bannerTitle(activeBanner) : ''}
-              loading="eager"
-              fetchPriority="high"
-              width={880}
-              height={370}
-              className="h-auto w-full object-contain [mask-image:radial-gradient(ellipse_at_center,#000_55%,transparent_100%)]"
-            />
-          </div>
+          <img
+            src={activeBanner?.imageUrl || '/images/hero/hero-photo.jpg'}
+            alt=""
+            loading="eager"
+            className="relative -mt-2 block h-44 w-full object-cover object-right sm:h-64 lg:hidden [mask-image:linear-gradient(to_bottom,transparent,#000_35%)]"
+          />
         </div>
       </section>
 
@@ -248,18 +257,9 @@ export default function HomePage() {
         </section>
       ) : null}
 
-      <section className="container-page py-14">
-        <div className="mb-7 flex items-end justify-between gap-4">
-          <div>
-            <h2 className="text-[26px] font-bold text-content">{t('home.categoriesTitle')}</h2>
-            <p className="mt-1 text-sm text-muted">{t('home.categoriesSubtitle')}</p>
-          </div>
-          <Link to={`/${currentLang}/catalog`} className="hidden text-sm link sm:inline-flex">
-            {t('common.viewAll')}
-          </Link>
-        </div>
+      <section className="container-page py-5">
         {categoriesQuery.isLoading ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+          <div className="-mx-[26px] flex scroll-px-[26px] snap-x gap-3 overflow-x-auto px-[26px] pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-8 lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden">
             {Array.from({ length: 8 }).map((_, index) => (
               <Skeleton key={index} className="h-[117px] rounded-[14px]" />
             ))}
@@ -269,14 +269,14 @@ export default function HomePage() {
             <p className="text-muted">{t('home.featuredEmpty')}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+          <div className="-mx-[26px] flex scroll-px-[26px] snap-x gap-3 overflow-x-auto px-[26px] pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-8 lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden">
             {rootCategories.slice(0, 7).map((category) => {
               const Icon = categoryIcons[category.slug] ?? MoreIcon;
               return (
                 <Link
                   key={category.id}
                   to={`/${currentLang}/catalog?category=${category.slug}`}
-                  className="group flex flex-col items-center gap-2 rounded-[14px] border border-line bg-surface px-3 py-4 text-center transition hover:border-brand hover:shadow-glow"
+                  className="group flex w-[112px] shrink-0 snap-start flex-col items-center gap-2 rounded-[14px] lg:w-auto border border-line bg-surface px-2 py-3 text-center transition hover:border-brand hover:shadow-glow"
                 >
                   <span className="flex h-[52px] w-[52px] items-center justify-center rounded-xl text-brand transition group-hover:scale-105 duration-200">
                     {category.imageUrl ? (
@@ -289,7 +289,7 @@ export default function HomePage() {
                       <Icon className="h-[34px] w-[34px]" />
                     )}
                   </span>
-                  <span className="text-[15px] font-medium leading-snug text-content max-w-[190px] line-clamp-2">
+                  <span className="text-[13px] font-medium leading-snug text-content max-w-[190px] line-clamp-2 sm:text-sm">
                     {localizedName(category, currentLang)}
                   </span>
                 </Link>
@@ -297,17 +297,37 @@ export default function HomePage() {
             })}
             <Link
               to={`/${currentLang}/catalog`}
-              className="group flex flex-col items-center justify-center gap-2 rounded-[14px] border border-line bg-surface px-3 py-4 text-center transition hover:border-brand hover:shadow-glow"
+              className="group flex w-[112px] shrink-0 snap-start flex-col items-center justify-center gap-2 rounded-[14px] lg:w-auto border border-line bg-surface px-2 py-3 text-center transition hover:border-brand hover:shadow-glow"
             >
               <span className="flex h-[52px] w-[52px] items-center justify-center rounded-xl text-brand transition group-hover:scale-105 duration-200">
                 <MoreIcon className="h-[34px] w-[34px]" />
               </span>
-              <span className="text-[15px] font-medium leading-snug text-content max-w-[190px] line-clamp-2">
+              <span className="text-[13px] font-medium leading-snug text-content max-w-[190px] line-clamp-2 sm:text-sm">
                 {t('categories.more')}
               </span>
             </Link>
           </div>
         )}
+      </section>
+
+      <section className="container-page pb-8">
+        <div className="rounded-[14px] border border-line bg-surface px-4">
+          <div className="grid grid-cols-2 gap-4 py-4 lg:flex lg:h-[62px] lg:items-center lg:justify-between lg:py-0">
+            {trustItems.map((item, index) => (
+              <Fragment key={item.key}>
+                <div className="flex flex-1 items-center justify-center gap-2 text-center">
+                  <item.icon className="h-8 w-8 shrink-0 text-brand" />
+                  <span className="text-xs font-medium text-content sm:text-[15px]">
+                    {t(`home.trust.${item.key}`)}
+                  </span>
+                </div>
+                {index < trustItems.length - 1 && (
+                  <div className="hidden w-px h-[36px] bg-line lg:block" />
+                )}
+              </Fragment>
+            ))}
+          </div>
+        </div>
       </section>
 
       <ProductRail
@@ -360,26 +380,6 @@ export default function HomePage() {
             <input id="newsletter-email" type="email" className="input" placeholder={t('common.email')} />
             <button type="submit" className="btn-primary shrink-0">{t('home.subscribe')}</button>
           </form>
-        </div>
-      </section>
-
-      <section className="container-page py-14">
-        <div className="rounded-[14px] border border-line bg-surface px-4">
-          <div className="grid grid-cols-2 gap-4 py-4 lg:flex lg:h-[62px] lg:items-center lg:justify-between lg:py-0">
-            {trustItems.map((item, index) => (
-              <Fragment key={item.key}>
-                <div className="flex flex-1 items-center justify-center gap-2 text-center">
-                  <item.icon className="h-8 w-8 shrink-0 text-brand" />
-                  <span className="text-[15px] font-medium text-content">
-                    {t(`home.trust.${item.key}`)}
-                  </span>
-                </div>
-                {index < trustItems.length - 1 && (
-                  <div className="hidden w-px h-[36px] bg-line lg:block" />
-                )}
-              </Fragment>
-            ))}
-          </div>
         </div>
       </section>
 

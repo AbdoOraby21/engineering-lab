@@ -170,19 +170,16 @@ export default function Header() {
               ) : null}
             </div>
           ) : (
-            <div className="hidden items-center gap-2 sm:flex">
-              <Link
-                to={`/${currentLang}/login`}
-                className="btn-secondary h-10 whitespace-nowrap px-4 py-0 text-sm"
-              >
-                {t('common.login')}
-              </Link>
-              <Link
-                to={`/${currentLang}/register`}
-                className="btn-primary h-10 whitespace-nowrap px-4 py-0 text-sm"
-              >
-                {t('common.register')}
-              </Link>
+            <div className="hidden items-center gap-3 border-s border-line ps-4 sm:flex">
+              <UserRound className="h-6 w-6 text-content" />
+              <div className="flex flex-col text-sm font-medium leading-snug text-content">
+                <Link to={`/${currentLang}/login`} className="whitespace-nowrap hover:text-brand">
+                  {t('common.login')}
+                </Link>
+                <Link to={`/${currentLang}/register`} className="whitespace-nowrap text-muted hover:text-brand">
+                  {t('common.register')}
+                </Link>
+              </div>
             </div>
           )}
 
@@ -207,14 +204,12 @@ export default function Header() {
             aria-live="polite"
           >
             <ShoppingCart className="h-4 w-4" />
-            {cartTotal > 0 ? (
-              <span
+            <span
                 className="absolute -end-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-brand-fg"
                 dir="ltr"
               >
                 {cartTotal}
               </span>
-            ) : null}
           </button>
 
           <button
