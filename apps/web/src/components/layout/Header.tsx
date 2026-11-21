@@ -185,10 +185,19 @@ export default function Header() {
               </Link>
             </div>
           )}
+          {!isAuthenticated ? (
+            <Link
+              to={`/${currentLang}/login`}
+              className="icon-btn sm:hidden"
+              aria-label={t('common.login')}
+            >
+              <UserRound className="h-4 w-4" />
+            </Link>
+          ) : null}
 
           <Link
             to={`/${currentLang}/compare`}
-            className="icon-btn relative"
+            className="icon-btn relative hidden sm:flex"
             aria-label={t('compare.title')}
           >
             <GitCompareArrows className="h-4 w-4" />

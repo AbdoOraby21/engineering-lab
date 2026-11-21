@@ -31,7 +31,7 @@ export default function ProductRail({
   const { t } = useTranslation();
 
   const header = (
-    <div className="mb-6 flex items-center justify-between gap-4">
+    <div className="mb-4 flex items-center sm:mb-6 justify-between gap-4">
       <div className="flex min-w-0 items-center gap-3">
         <span className="h-9 w-1 shrink-0 rounded-sm bg-brand shadow-[0_0_24px_rgba(34,197,94,0.35)]" />
         <div className="min-w-0">

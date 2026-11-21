@@ -28,14 +28,14 @@ export default function Navbar() {
   const categories = categoriesQuery.data ?? [];
 
   const linkClass = (isActive: boolean) =>
-    `rounded-[10px] px-3 py-2 text-sm font-medium transition ${
+    `shrink-0 rounded-[10px] px-3 py-2 text-sm font-medium transition ${
       isActive ? 'bg-surface text-brand' : 'text-content hover:bg-surface hover:text-brand'
     }`;
 
   return (
-    <div className="relative z-30 hidden border-b border-line bg-bg lg:block">
-      <div className="container-page flex h-12 items-center gap-1">
-        <div className="relative">
+    <div className="relative z-30 border-b border-line bg-bg">
+      <div className="container-page flex h-12 items-center gap-1 sm:gap-2">
+        <div className="relative shrink-0">
           <button
             type="button"
             className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm font-medium text-content transition hover:bg-surface hover:text-brand"
@@ -57,11 +57,11 @@ export default function Navbar() {
                 className="fixed inset-0 z-40 cursor-default"
                 onClick={() => setMegaOpen(false)}
               />
-              <div className="absolute start-0 top-full z-50 mt-2 w-[34rem] rounded-[14px] border border-line bg-surface p-4 shadow-card">
+              <div className="absolute start-0 top-full z-50 mt-2 w-[min(34rem,calc(100vw-2.5rem))] rounded-[14px] border border-line bg-surface p-4 shadow-card">
                 {categories.length === 0 ? (
                   <p className="px-2 py-3 text-sm text-muted">{t('home.featuredEmpty')}</p>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid max-h-[60vh] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
                     {categories.slice(0, 8).map((category) => (
                       <div key={category.id} className="rounded-[12px] p-2 hover:bg-surface2">
                         <Link
@@ -102,6 +102,7 @@ export default function Navbar() {
           ) : null}
         </div>
 
+        <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {links.map((item) => (
           <NavLink
             key={item.key}
@@ -112,10 +113,11 @@ export default function Navbar() {
             {t(item.key)}
           </NavLink>
         ))}
+        </div>
 
         <Link
           to={`/${currentLang}/support`}
-          className="ms-auto flex items-center gap-2 rounded-full border border-brand/40 bg-brand/10 px-3 py-1.5 text-sm font-semibold text-brand transition hover:bg-brand/15"
+          className="ms-auto hidden shrink-0 items-center gap-2 rounded-full lg:flex border border-brand/40 bg-brand/10 px-3 py-1.5 text-sm font-semibold text-brand transition hover:bg-brand/15"
         >
           <Truck className="h-4 w-4" />
           <span>{t('common.fastDelivery')}</span>
