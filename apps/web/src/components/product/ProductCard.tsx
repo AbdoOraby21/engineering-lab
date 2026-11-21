@@ -57,8 +57,8 @@ export default function ProductCard({ product, home = false }: ProductCardProps)
         }}
       >
         {/* Image area: pure white, object-contain, padded */}
-        <div className="relative h-[165px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[235px]">
-          <div className="absolute inset-[10px] flex sm:inset-[14px] items-center justify-center">
+        <div className="relative h-[235px] w-full overflow-hidden rounded-[14px] bg-white">
+          <div className="absolute inset-[14px] flex items-center justify-center">
             {product.primaryImage ? (
               <>
                 <img
@@ -95,7 +95,7 @@ export default function ProductCard({ product, home = false }: ProductCardProps)
             tabIndex={-1}
           />
           {/* Badges top-start */}
-          <span className="pointer-events-none absolute start-2 top-2 flex flex-col gap-1 sm:start-3 sm:top-3 sm:gap-1.5">
+          <span className="pointer-events-none absolute start-3 top-3 flex flex-col gap-1.5">
             {onSale ? (
               <span className="badge bg-red-500/15 text-red-400" dir="ltr">
                 -{discount}%
@@ -114,7 +114,7 @@ export default function ProductCard({ product, home = false }: ProductCardProps)
             ) : null}
           </span>
           {/* Floating wishlist/compare icons */}
-          <div className="absolute end-2 top-2 z-10 flex flex-col gap-2 sm:end-3 sm:top-3">
+          <div className="absolute end-3 top-3 z-10 flex flex-col gap-2">
             <WishlistButton productId={product.id} className="h-8 w-8" />
             <button
               type="button"
@@ -146,17 +146,17 @@ export default function ProductCard({ product, home = false }: ProductCardProps)
 
           <Link
             to={`/${currentLang}/products/${product.slug}`}
-            className="line-clamp-2 block max-h-[2.6rem] min-h-[2.6rem] overflow-hidden text-sm font-semibold sm:max-h-[3rem] sm:min-h-[3rem] sm:text-[15px] leading-snug text-content transition hover:text-brand"
+            className="line-clamp-2 min-h-[3rem] text-[15px] font-semibold leading-snug text-content transition hover:text-brand"
           >
             {name}
           </Link>
 
           <div className="mt-auto flex items-end justify-between gap-2 pt-2">
             <div className="flex min-w-0 flex-col">
-              <div className="flex flex-wrap items-baseline gap-x-1.5">
-                <span className="text-base font-bold text-brand sm:text-[18px]">{formatEGP(product.price, currentLang)}</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-brand font-bold text-[18px]">{formatEGP(product.price, currentLang)}</span>
                 {onSale ? (
-                  <span className="text-[11px] text-muted line-through sm:text-[13px]">
+                  <span className="text-muted text-[13px] line-through">
                     {formatEGP(product.compareAtPrice!, currentLang)}
                   </span>
                 ) : null}
