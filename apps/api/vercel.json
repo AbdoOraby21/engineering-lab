@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "pnpm exec prisma generate && pnpm exec tsup",
+  "outputDirectory": "public",
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
+  "crons": [{ "path": "/api/v1/cron/jobs", "schedule": "0 3 * * *" }]
+}

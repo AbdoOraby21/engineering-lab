@@ -4,15 +4,15 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://engineering-lab-api.onrender.com/api/:path*"
+      "destination": "https://api-abdo-oraby-s-projects.vercel.app/api/:path*"
     },
     {
       "source": "/sitemap.xml",
-      "destination": "https://engineering-lab-api.onrender.com/sitemap.xml"
+      "destination": "https://api-abdo-oraby-s-projects.vercel.app/sitemap.xml"
     },
     {
       "source": "/robots.txt",
-      "destination": "https://engineering-lab-api.onrender.com/robots.txt"
+      "destination": "https://api-abdo-oraby-s-projects.vercel.app/robots.txt"
     },
     {
       "source": "/(.*)",
